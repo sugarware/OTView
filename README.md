@@ -14,7 +14,7 @@ Outline-Text Viewer
 * 可変レイアウト
 * 可変文字サイズ
 
-## 🚀[Webを実行出来ます！](https://sugarware.github.io/OTView)
+## 🚀[Web上で実行出来ます！](https://sugarware.github.io/OTView)
 
 
 
