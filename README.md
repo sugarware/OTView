@@ -18,4 +18,7 @@ Outline-Text Viewer
 
 [実行](https://github.com/sugarware/OTView/blob/main/OTView_v2.0f.html)
 
+![](https://github.com/sugarware/OTView/main/IMG_0775.png)
+
+
 
