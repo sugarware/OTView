@@ -1,4 +1,4 @@
-![]{https://github.com/sugarware/OTView/main/img-0775.jpg}
+![]{https://github.com/sugarware/OTView/main/IMG_0775.png}
 
 # OTView
 Outline-Text Viewer
