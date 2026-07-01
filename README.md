@@ -13,4 +13,6 @@ Outline-Text Viewer
 * 可変レイアウト
 * 可変文字サイズ
 
-[画面](Git-hub/sugarware/OTView/code/OTView_v2.9f.html)
+[Run](https://github.com/sugarware/OTView/blob/main/OTView_v2.0f.html)
+
+![スクリーン](https://github.com/sugarware/OTView/blob/main/OTView_v2.0f.html "スクショ")
