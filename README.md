@@ -1,3 +1,5 @@
+![]{https://github.com/sugarware/OTView/commit/974314ab438f0f7a3139e02a7096759da7c64934}
+
 # OTView
 Outline-Text Viewer
 
@@ -13,6 +15,6 @@ Outline-Text Viewer
 * 可変レイアウト
 * 可変文字サイズ
 
-[Run](https://github.com/sugarware/OTView/blob/main/OTView_v2.0f.html)
+[実行](https://github.com/sugarware/OTView/blob/main/OTView_v2.0f.html)
 
-![スクリーン]()
+
