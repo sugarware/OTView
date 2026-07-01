@@ -15,4 +15,4 @@ Outline-Text Viewer
 
 [Run](https://github.com/sugarware/OTView/blob/main/OTView_v2.0f.html)
 
-![スクリーン](https://github.com/sugarware/OTView/blob/main/OTView_v2.0f.html "スクショ")
+![スクリーン]()
