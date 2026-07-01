@@ -1,4 +1,4 @@
-
+![スクリーン](https://github.com/sugarware/OTView/blob/main/IMG_0775.png)
 # OTView
 Outline-Text Viewer
 
@@ -16,7 +16,6 @@ Outline-Text Viewer
 
 ## 🚀[Webを実行出来ます！](https://sugarware.github.io/OTView)
 
-![スクリーン](https://github.com/sugarware/OTView/blob/main/IMG_0775.png)
 
 
 
