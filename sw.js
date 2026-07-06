@@ -1,8 +1,8 @@
-const CACHE_NAME = 'otview-v2-1h-icon3';
+const CACHE_NAME = 'otview-v2-1j-icon3';
 const APP_SHELL = [
   './',
   './index.html',
-  './OTView_v2_1h.html',
+  './OTView_v2_1j.html',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png'
@@ -27,6 +27,6 @@ self.addEventListener('fetch', event => {
       const copy = response.clone();
       caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
       return response;
-    }).catch(() => caches.match('./index.html') || caches.match('./OTView_v2_1h.html')))
+    }).catch(() => caches.match('./index.html') || caches.match('./OTView_v2_1j.html')))
   );
 });
