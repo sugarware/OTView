@@ -2,7 +2,7 @@
   "name": "OTView",
   "short_name": "OTView",
   "description": "階層構造テキストビューア OTView",
-  "start_url": "./OTView_v2_1g.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#121416",
