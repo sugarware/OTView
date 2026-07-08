@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>OTView v2.1j</title>
+<title>OTView v2.2e</title>
 <style>
 :root {
   --app-bg: #f6f7f9;
@@ -578,10 +578,21 @@ main.layoutHorizontal #leftColumn.resultsShown #resultsPane { flex: 1 1 auto; mi
 }
 #right .viewerBox, #right .viewerBox *:not(mark) { color: inherit !important; }
 pre.viewerBox { white-space: pre-wrap; word-break: break-word; font-family: inherit; font-size: inherit; margin: 0; }
+.viewerBox, .viewerBox pre, .viewerBox code { tab-size: var(--ot-tab-size, 4); }
 .rendered { word-break: break-word; }
 .rendered .md-table-scroll { overflow-x: auto; margin: 0.9em 0; }
 .rendered table { border-collapse: collapse; max-width: 100%; width: max-content; min-width: min(100%, 420px); background: var(--right-bg); }
-.rendered th, .rendered td { border: 1px solid var(--line); padding: 6px 10px; vertical-align: top; }
+.rendered th, .rendered td { border: 0; padding: 6px 10px; vertical-align: top; }
+/* v2.2c: 横罫線の省略度に合わせて上下余白を詰め、表示密度を上げる。
+   th は見出しとして少し余裕を残し、td はデータ行として高密度化する。 */
+.rendered table.md-hline-header th { padding-top: 4px; padding-bottom: 4px; }
+.rendered table.md-hline-header td { padding-top: 3px; padding-bottom: 3px; }
+.rendered table.md-hline-none th { padding-top: 3px; padding-bottom: 3px; }
+.rendered table.md-hline-none td { padding-top: 1px; padding-bottom: 1px; }
+.rendered table.md-hline-standard th, .rendered table.md-hline-standard td { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.rendered table.md-hline-header thead th { border-bottom: 1px solid var(--line); }
+.rendered table.md-vline-standard th, .rendered table.md-vline-standard td { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.rendered table.md-vline-item th:first-child, .rendered table.md-vline-item td:first-child { border-right: 1px solid var(--line); }
 .rendered th { font-weight: 700; background: rgba(127,127,127,.10); }
 .rendered pre { overflow-x: auto; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(127,127,127,.08); line-height: 1.55; }
 .rendered code { padding: 0.1em 0.3em; border-radius: 4px; background: rgba(127,127,127,.10); }
@@ -835,10 +846,29 @@ main.layoutVertical #treeResultSplitter.dragging::after {
         <option value="right">右利き用</option>
         <option value="left">左利き用</option>
       </select></label>
+      <label class="settingRow"><span>Tab幅</span><select id="tabSize" title="Tab文字の表示幅">
+        <option value="1">1文字</option>
+        <option value="2">2文字</option>
+        <option value="4" selected>4文字</option>
+        <option value="6">6文字</option>
+        <option value="8">8文字</option>
+        <option value="12">12文字</option>
+        <option value="16">16文字</option>
+      </select></label>
+      <label class="settingRow"><span>表 横罫線</span><select id="mdTableHLine" title="Markdown表の横罫線">
+        <option value="standard">標準</option>
+        <option value="header" selected>タイトル行下だけ</option>
+        <option value="none">なし</option>
+      </select></label>
+      <label class="settingRow"><span>表 縦罫線</span><select id="mdTableVLine" title="Markdown表の縦罫線">
+        <option value="standard">標準</option>
+        <option value="item" selected>項目欄右だけ</option>
+        <option value="none">なし</option>
+      </select></label>
     </div>
     <div id="headingTagBox" class="settingBox" style="display:none">
       <h3>見出しタグ</h3>
-      <div class="tagHelp">/ で始まる見出しをタグとして扱い、表示／非表示を切り替えます。</div>
+      <div class="tagHelp">/ で始まる見出しタグは初期表示、\ で始まる見出しタグは初期非表示として扱い、表示／非表示を切り替えます。</div>
       <div id="headingTagList"></div>
       <div id="headingTagWarning" class="tagWarning" style="display:none"></div>
     </div>
@@ -978,7 +1008,7 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 
 <div id="otInfoOverlay" class="otInfoOverlay hidden" role="dialog" aria-modal="true" aria-label="OTView情報">
   <div class="otInfoPanel">
-    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.1j</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
+    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.2e</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
     <div id="otInfoBody" class="otInfoRows"></div>
     <div class="otInfoSep"></div>
     <div id="otInfoDetail" class="otInfoSmall hidden"></div>
@@ -995,8 +1025,8 @@ const DOC_STORAGE_KEY = "wzViewerV20LastUserDocument";
 const BUILTIN_DOC_STORAGE_KEY = "wzViewerV20BuiltinGuideState";
 const STARTUP_DONE_KEY = "wzViewerV20FirstRunCompleted";
 const BUILTIN_DOCUMENT_NAME = "OTView はじめてガイド";
-const BUILTIN_DOCUMENT_TEXT = ".OTView はじめてガイド\n\nVersion 1.2\n対応版：OTView v2.1j\n\nようこそ、OTViewへ。\n\nこのガイドは、OTViewのすべての機能を説明するものではありません。\n初めて使う方が、安心して使い始められるように書かれています。\n\nまずは実際に触ってみてください。\n分からないことがあれば、このガイドに戻ってきましょう。\n\n⸻\n\n..1 OTViewとは\n\n...1.1 OTViewでできること\n\nOTViewは、階層構造を持つ文書を快適に読むためのビューアです。\n\n長い文書でも、見出しをたどりながら目的の情報へ素早く移動できます。\n\nまた、検索やMarkdown表示などを利用することで、知識ベースやマニュアルも読みやすく表示できます。\n\nOTViewは、「探して読む」に特化したシンプルなツールです。\n\n⸻\n\n...1.2 このガイドの読み方\n\n最初は順番に読んでください。\n\n読み終えたら、ぜひ自分の文書やMarkdown形式の文書を開いて試してみてください。\n\n実際に触りながら覚えることが、OTViewを使いこなす一番の近道です。\n\n⸻\n\n..2 まず画面を見てみよう\n\n...2.1 3つのペーン\n\nOTViewの画面は、主に3つのペーンで構成されています。\n\n**階層ペーン**\n\n文書全体の構造を表示します。\n読みたい項目を選ぶための案内役です。\n\n**本文ペーン**\n\n選択した項目の本文を表示します。\n読む時間のほとんどは、このペーンを使います。\n\n**検索結果ペーン**\n\n検索で見つかった項目を一覧表示します。\n検索結果から直接本文へ移動できます。\n\n画面の向きや表示設定によって、ペーンの並び方は変わります。\n\n⸻\n\n...2.2 上部のボタン\n\nOTViewの上部には、よく使うボタンが並んでいます。\n殆どのボタンは長押しすれば説明が表示されますので\n\n**『迷ったら長押し』\n\nと覚えましょう！\n\n\n**検索**\n\n検索メニューや検索結果ペーンを表示します。\n\n**TXT**\n\n本文の表示形式を切り替えます。\nText、Markdown、HTML表示を使い分けられます。\n\n**A±**\n\n３つのペーンの文字サイズをそれぞれ調整します。\n\n**表示**\n\n本文だけを大きく表示したり、左右表示／上下表示を切り替えたりします。\n\n**設定**\n\n文書を開く、配色を変える、見出し判定を選ぶなどの設定を行います。\n\n細かい機能は「長押し」を活用して確認しながら、気軽に試して慣れましょう！\n\n⸻\n\n...2.3 共通する操作\n\nOTViewでは、多くのボタンが共通した考え方で動作します。\n\n* タップ：基本操作\n* ダブルタップ：関連する別操作\n* 長押し：そのボタンの説明\n\nすべてのボタンで必ず同じ動作になるわけではありませんが、まずはこの考え方で触ると理解しやすくなります。\n\nビューワーですからどんな操作をしても文書の内容は変更されません。\n安心していろいろ試してみてください。\n\n⸻\n\n...2.4 まず試してみよう\n\nここまで読んだら、実際に操作してみましょう。\n\nまずは、次の操作を試してください。\n\n* 設定から文書ファイルを開く\n* 階層を開く\n* 項目を選ぶ\n* 本文を読む\n* 表示ボタンを押してみる\n* A±ボタンを押してみる\n\nこれだけでOTViewの基本的な使い方は体験できます。\n\n細かい機能は、必要になったときに少しずつ覚えれば十分です。\n\n⸻\n\n..3 文書を読んでみよう\n\n...3.1 階層から読む\n\nOTViewでは、まず階層ペーンから読みたい項目を選びます。\n\n長い文書でも、必要な場所へ素早く移動できます。\n\n階層表示の▶や▼をタップすれば、階層が開いたり閉じたりします。\n\n読み終えたら別の項目を選ぶだけです。\n\nページをめくる感覚ではなく、目次から直接目的の場所へ移動する感覚で利用してください。\n\n⸻\n\n...3.2 検索を使う\n\n読みたい内容を探し出したいときは、検索を利用すると便利です。\n\n検索ボタンを押して検索メニューを表示し、検索文字を入力してからルーペボタンをタップ/ダブルタップします。\n\n検索すると、該当する項目が検索結果ペーンへ一覧表示されます。\n\n検索結果ペーンが表示されていないときは、検索ボタンや表示ボタンで表示できます。\n\n気になる項目を選ぶだけで本文へ移動できます。\n\n検索結果は、自分で作る一時的な索引のようにも使えます。\n長い文書ほど検索の効果を実感できます。\n\n⸻\n\n...3.3 見出しタグを使った文書\n\n文書によっては、`/作者メモ` や `/補足` のような見出しタグが使われていることがあります。\n\n見出しタグは、情報の種類を表す目印です。\n\n設定でタグごとに表示／非表示を切り替えられるため、自分に必要な情報だけを表示して読むことができます。\n\n詳しい使い方は、機能リファレンスで確認してください。\n\n⸻\n\n...3.4 OTViewらしい読み方\n\nOTViewには、決まった読み方はありません。\n\n階層から読んでも、検索から読んでも構いません。\n\n目的に合わせて自由に使い分けてください。\n\n読み進めるうちに、自分に合った使い方が見つかるでしょう。\n\n⸻\n\n..4 表示を自分好みにする\n\n...4.1 ペーンの広さ\n\nペーンの境界は自由に調整できます。\n\n本文を広くしたいときは本文ペーンを、階層を見やすくしたいときは階層ペーンを広げてみてください。\n\n階層ペーンと検索結果ペーンの境界も調整できます。\n\n文書によって、読みやすい配置は変わります。\n\n⸻\n\n...4.2 表示ボタン\n\n表示ボタンは、本文を広く読みたいときに便利です。\n\nタップすると、本文だけの表示をON／OFFできます。\n\nダブルタップすると、左右表示と上下表示を切り替えます。\n\n長押しすると、説明が出ます。\n\nまずはタップだけ覚えれば十分です。\n\n⸻\n\n...4.3 TXTボタン\n\nTXTボタンは、本文の表示形式を切り替えるためのボタンです。\n\nText表示、Markdown表示、HTML表示を使い分けられます。\n\n通常のテキスト文書なら、まずは初期状態のままで構いません。\n\nMarkdown形式の文書では、表やリストが見やすく表示されます。\n\n⸻\n\n...4.4 設定\n\n設定では、文書ファイルを開いたり、表示を調整したりできます。\n\n主な設定には、次のようなものがあります。\n\n* 新規ファイルを開く\n* 読み込まれているファイルを切り替える\n\n* 配色\n* アクセントカラー\n* 見出し判定\n* 利き手\n* 見出しタグの表示\n* 詳細設定\n\n読みにくいと感じたら、自分に合った表示へ調整してください。\n\n設定はいつでも変更できます。\n\n⸻\n\n..5 OTViewをもっと活用する\n\n...5.1 自分専用の知識ベース\n\nOTViewは、自分で育てていく知識ベースとの相性が良いビューアです。\n\n調べたことや経験を一つの文書へまとめておくと、必要になったときすぐに探し出せます。\n\n階層で整理し、検索で横断することで、知識を効率よく活用できます。\n\n⸻\n\n...5.2 他の利用例\n\nOTViewは、知識ベース以外にも利用できます。\n\n例えば、次のような文書です。\n\n* ユーザーズマニュアル\n* 技術資料\n* 学習教材\n* 読書ノート\n* 日記\n\n構造化された文書であれば、OTViewで快適に読むことができます。\n\n⸻\n\n..6 次にやってみよう\n\nここまで読めば、OTViewの基本的な使い方は分かります。\n\n次は、自分の文書を開いて試してみてください。\n\nまずは、次の操作だけで十分です。\n\n* 階層をたどる\n* 本文を読む\n* 検索する\n* 表示を切り替える\n* 文字サイズを変える\n\n分からない機能があれば「機能リファレンス」を、OTView向けの文書を書きたくなったら「文書作成ガイド」を利用してください。\n\nOTViewは、使いながら少しずつ慣れていくツールです。\n\nまずは気軽に触ってみましょう。\n";
-const SETTINGS_VERSION = 8;
+const BUILTIN_DOCUMENT_TEXT = ".OTView はじめてガイド\n\nVersion 1.4\n対応版：OTView v2.2e\n\nようこそ、OTViewへ。\n\nこのガイドは、OTViewのすべての機能を説明するものではありません。\n初めて使う方が、安心して使い始められるように書かれています。\n\nまずは実際に触ってみてください。\n分からないことがあれば、このガイドに戻ってきましょう。\n\n⸻\n\n..1 OTViewとは\n\n...1.1 OTViewでできること\n\nOTViewは、階層構造を持つ文書を快適に読むためのビューアです。\n\n長い文書でも、見出しをたどりながら目的の情報へ素早く移動できます。\n\nまた、検索やMarkdown表示などを利用することで、知識ベースやマニュアルも読みやすく表示できます。\n\nOTViewは、「探して読む」に特化したシンプルなツールです。\n\n⸻\n\n...1.2 このガイドの読み方\n\n最初は順番に読んでください。\n\n読み終えたら、ぜひ自分の文書やMarkdown形式の文書を開いて試してみてください。\n\n実際に触りながら覚えることが、OTViewを使いこなす一番の近道です。\n\n⸻\n\n..2 まず画面を見てみよう\n\n...2.1 3つのペーン\n\nOTViewの画面は、主に3つのペーンで構成されています。\n\n**階層ペーン**\n文書全体の構造を表示します。  \n読みたい項目を選ぶための案内役です。\n\n**本文ペーン**\n選択した項目の本文を表示します。\n読む時間のほとんどは、このペーンを使います。\n\n**検索結果ペーン**\n検索で見つかった項目を一覧表示します。\n 検索結果から直接本文へ移動できます。\n\n画面の向きや表示設定によって、ペーンの並び方は変わります。\n\n⸻\n\n...2.2 上部のボタン\n\nOTViewの上部には、よく使うボタンが並んでいます。\n殆どのボタンは長押しすれば説明が表示されますので\n\n**『迷ったら長押し』\n\nと覚えましょう！\n\n\n**検索**\n検索メニューや検索結果ペーンを表示します。\n\n**TXT**\n本文の表示形式を切り替えます。\nText、Markdown、HTML表示を使い分けられます。\n\n**A±**\n３つのペーンの文字サイズをそれぞれ調整します。\n\n**表示**\n本文だけを大きく表示したり、左右表示／上下表示を切り替えたりします。\n\n**設定**\n文書を開く、配色を変える、見出し判定を選ぶなどの設定を行います。\n\n\n細かい機能は「長押し」を活用して確認しながら、気軽に試して慣れましょう！\n\n⸻\n\n...2.3 共通する操作\n\nOTViewでは、多くのボタンが共通した考え方で動作します。\n\n|操作　　　　　|機能|\n|:-------------------|:-----|\n|タップ　　　　|基本操作|\n|ダブルタップ　|関連する別操作|\n|長押し　　　　|そのボタンの説明|\n\nすべてのボタンで必ず同じ動作になるわけではありませんが、まずはこの考え方で触ると理解しやすくなります。\n\nビューワーですからどんな操作をしても文書の内容は変更されません。\n安心していろいろ試してみてください。\n\n⸻\n\n...2.4 まず試してみよう\n\nここまで読んだら、実際に操作してみましょう。\n\nまずは、次の操作を試してください。\n\n* 設定から文書ファイルを開く\n* 階層を開く\n* 項目を選ぶ\n* 本文を読む\n* 表示ボタンを押してみる\n* A±ボタンを押してみる\n\nこれだけでOTViewの基本的な使い方は体験できます。\n\n細かい機能は、必要になったときに少しずつ覚えれば十分です。\n\n⸻\n\n..3 文書を読んでみよう\n\n...3.1 階層から読む\n\nOTViewでは、まず階層ペーンから読みたい項目を選びます。\n\n長い文書でも、必要な場所へ素早く移動できます。\n\n階層表示の▶や▼をタップすれば、階層が開いたり閉じたりします。\n\n読み終えたら別の項目を選ぶだけです。\n\nページをめくる感覚ではなく、目次から直接目的の場所へ移動する感覚で利用してください。\n\n⸻\n\n...3.2 検索を使う\n\n読みたい内容を探し出したいときは、検索を利用すると便利です。\n\n検索ボタンを押して検索メニューを表示し、検索文字を入力してからルーペボタンをタップ/ダブルタップします。\n\n検索すると、該当する項目が検索結果ペーンへ一覧表示されます。\n\n検索結果ペーンが表示されていないときは、検索ボタンや表示ボタンで表示できます。\n\n気になる項目を選ぶだけで本文へ移動できます。\n\n検索結果は、自分で作る一時的な索引のようにも使えます。\n長い文書ほど検索の効果を実感できます。\n\n⸻\n\n...3.3 見出しタグを使った文書\n\n文書によっては、`/作者メモ` や `/補足` のような見出しタグが使われていることがあります。\n\n見出しタグは、情報の種類を表す目印です。\n\n設定でタグごとに表示／非表示を切り替えられるため、自分に必要な情報だけを表示して読むことができます。\n\n詳しい使い方は、機能リファレンス(%作成予定)で確認してください。\n\n\n..../3.3.1 まずは\nこの見出しタグは、デフォルトで表示Onとなります。\n最初は読んで欲しいが、後で非表示にしても良い内容に向いています。\n\n見えてない見出しタグは、設定で表示Onにできます。\n\n....\\3.3.2 慣れたら\nこの見出しタグは、デフォルトで表示Offとなります。\n最初は読む必要がないが、慣れてきたら読んでも良い内容に向いています。\n\n⸻\n\n...3.4 OTViewらしい読み方\n\nOTViewには、決まった読み方はありません。\n\n階層から読んでも、検索から読んでも構いません。\n\n目的に合わせて自由に使い分けてください。\n\n読み進めるうちに、自分に合った使い方が見つかるでしょう。\n\n⸻\n\n..4 表示を自分好みにする\n\n...4.1 ペーンの広さ\n\nペーンの境界は自由に調整できます。\n\n本文を広くしたいときは本文ペーンを、階層を見やすくしたいときは階層ペーンを広げてみてください。\n\n階層ペーンと検索結果ペーンの境界も調整できます。\n\n文書によって、読みやすい配置は変わります。\n\n⸻\n\n...4.2 表示ボタン\n\n表示ボタンは、本文を広く読みたいときに便利です。\n\nタップすると、本文だけの表示をON／OFFできます。\n\nダブルタップすると、左右表示と上下表示を切り替えます。\n\n長押しすると、説明が出ます。\n\nまずはタップだけ覚えれば十分です。\n\n⸻\n\n...4.3 TXTボタン\n\nTXTボタンは、本文の表示形式を切り替えるためのボタンです。\n\nText表示、Markdown表示、HTML表示を使い分けられます。\n\n通常のテキスト文書なら、まずは初期状態のままで構いません。\n\nMarkdown形式の文書では、表やリストが見やすく表示されます。\n\n⸻\n\n...4.4 設定\n\n設定では、文書ファイルを開いたり、表示を調整したりできます。\n\n主な設定には、次のようなものがあります。\n\n* 新規ファイルを開く\n* 読み込まれているファイルを切り替える\n\n* 配色\n* アクセントカラー\n* 見出し判定\n* 利き手\n* Tab幅\n* Markdown表の罫線表示\n* 見出しタグの表示\n* 詳細設定\n\n読みにくいと感じたら、自分に合った表示へ調整してください。\n\n設定はいつでも変更できます。\n\n⸻\n\n..5 OTViewをもっと活用する\n\n...5.1 自分専用の知識ベース\n\nOTViewは、自分で育てていく知識ベースとの相性が良いビューアです。\n\n調べたことや経験を一つの文書へまとめておくと、必要になったときすぐに探し出せます。\n\n階層で整理し、検索で横断することで、知識を効率よく活用できます。\n\n⸻\n\n...5.2 他の利用例\n\nOTViewは、知識ベース以外にも利用できます。\n\n例えば、次のような文書です。\n\n* ユーザーズマニュアル\n* 技術資料\n* 学習教材\n* 読書ノート\n* 日記\n\n構造化された文書であれば、OTViewで快適に読むことができます。\n\n⸻\n\n..6 次にやってみよう\n\nここまで読めば、OTViewの基本的な使い方は分かります。\n\n次は、自分の文書を開いて試してみてください。\n\nまずは、次の操作だけで十分です。\n\n* 階層をたどる\n* 本文を読む\n* 検索する\n* 表示を切り替える\n* 文字サイズを変える\n\n分からない機能があれば「機能リファレンス」を、OTView向けの文書を書きたくなったら「文書作成ガイド」を利用してください。\n\nOTViewは、使いながら少しずつ慣れていくツールです。\n\nまずは気軽に触ってみましょう。\n";
+const SETTINGS_VERSION = 10;
 const FONT_PRESETS = [
   { name: 'システム標準（推奨）', value: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif', hint: '端末の標準表示。迷ったらこれが無難です。' },
   { name: '読みやすいゴシック', value: '"Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif', hint: '本文・メニュー向きの一般的なゴシック体です。' },
@@ -1035,6 +1065,9 @@ const defaultSettings = {
   richViewMode: 'markdown',
   headingMode: 'dot',
   menuMode: 'right',
+  tabSize: 4,
+  mdTableHLine: 'header',
+  mdTableVLine: 'item',
   showResults: false,
   layout: { leftWidth: 330, topHeight: 50, treeResultSplit: 50 },
   lastFileName: '',
@@ -1045,7 +1078,7 @@ const defaultSettings = {
 function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
 const state = {
   text: "", lines: [], nodes: [], flat: [], activeId: null, collapsed: new Set(), query: "",
-  matches: [], currentMatchIndex: -1, settings: deepClone(defaultSettings), readingDisplayMode: 0, lastSplitMode: 0, headingTags: [], tagOverflow: false,
+  matches: [], currentMatchIndex: -1, settings: deepClone(defaultSettings), readingDisplayMode: 0, lastSplitMode: 0, headingTags: [], headingTagDefaults: {}, tagOverflow: false,
   searchScope: 'subtree', searchMenuVisible: false, activePane: 'right', currentDocumentSource: 'builtin', currentFile: null, currentFileName: '', currentFileLastModified: 0, currentDocumentUrl: '', pendingReloadFileSelection: null, headingLineSet: new Set(), nodeById: new Map(), contentCache: new Map(), autosaveTimer: null
 };
 const els = {
@@ -1062,7 +1095,7 @@ const els = {
   openFileSettings: document.getElementById("openFileSettings"), switchDocumentSource: document.getElementById("switchDocumentSource"), documentSourceStatus: document.getElementById("documentSourceStatus"),
   fontSizeCycleBtn: document.getElementById("fontSizeCycleBtn"),
   otInfoOverlay: document.getElementById("otInfoOverlay"), otInfoClose: document.getElementById("otInfoClose"), otInfoBody: document.getElementById("otInfoBody"), otInfoDetail: document.getElementById("otInfoDetail"), otInfoDetailBtn: document.getElementById("otInfoDetailBtn"), otInfoAboutBtn: document.getElementById("otInfoAboutBtn"),
-  settingsBtn: document.getElementById("settingsBtn"), focusReadBtn: document.getElementById("focusReadBtn"), settingsPanel: document.getElementById("settingsPanel"), closeSettings: document.getElementById("closeSettings"), saveSettings: document.getElementById("saveSettings"), resetFontSize: document.getElementById("resetFontSize"), copyColorActions: document.getElementById("copyColorActions"), copyDarkColors: document.getElementById("copyDarkColors"), copyLightColors: document.getElementById("copyLightColors"), clearSearch: document.getElementById("clearSearch"), settingsMainView: document.getElementById("settingsMainView"), settingsDetailView: document.getElementById("settingsDetailView"), openDetailSettings: document.getElementById("openDetailSettings"), settingsBack: document.getElementById("settingsBack"), settingsTitleNote: document.getElementById("settingsTitleNote"), detailModeTitle: document.getElementById("detailModeTitle"), detailCheckMessage: document.getElementById("detailCheckMessage"), saveSettingsDetail: document.getElementById("saveSettingsDetail"), accentColorPicker: document.getElementById("accentColorPicker"), resetAllSettings: document.getElementById("resetAllSettings"), headingTagBox: document.getElementById("headingTagBox"), headingTagList: document.getElementById("headingTagList"), headingTagWarning: document.getElementById("headingTagWarning")
+  settingsBtn: document.getElementById("settingsBtn"), focusReadBtn: document.getElementById("focusReadBtn"), settingsPanel: document.getElementById("settingsPanel"), closeSettings: document.getElementById("closeSettings"), saveSettings: document.getElementById("saveSettings"), resetFontSize: document.getElementById("resetFontSize"), copyColorActions: document.getElementById("copyColorActions"), copyDarkColors: document.getElementById("copyDarkColors"), copyLightColors: document.getElementById("copyLightColors"), clearSearch: document.getElementById("clearSearch"), settingsMainView: document.getElementById("settingsMainView"), settingsDetailView: document.getElementById("settingsDetailView"), openDetailSettings: document.getElementById("openDetailSettings"), settingsBack: document.getElementById("settingsBack"), settingsTitleNote: document.getElementById("settingsTitleNote"), detailModeTitle: document.getElementById("detailModeTitle"), detailCheckMessage: document.getElementById("detailCheckMessage"), saveSettingsDetail: document.getElementById("saveSettingsDetail"), accentColorPicker: document.getElementById("accentColorPicker"), resetAllSettings: document.getElementById("resetAllSettings"), headingTagBox: document.getElementById("headingTagBox"), headingTagList: document.getElementById("headingTagList"), headingTagWarning: document.getElementById("headingTagWarning"), tabSize: document.getElementById("tabSize"), mdTableHLine: document.getElementById("mdTableHLine"), mdTableVLine: document.getElementById("mdTableVLine")
 };
 function normalizeNewlines(s) { return s.replace(/\r\n/g, "\n").replace(/\r/g, "\n"); }
 function detectHeading(line, mode) {
@@ -1077,25 +1110,31 @@ function detectHeading(line, mode) {
   if (mode === "indent") { const m = line.match(/^([ \t　]*)(\S.*)$/u); if (m) { const indent = m[1].replace(/\t/g, "    ").replace(/　/g, "  ").length; if (m[2].length <= 80) return { level: Math.floor(indent / 2) + 1, title: m[2].trim(), marker: "indent" }; } }
   return null;
 }
-function extractHeadingTag(title) {
+function extractHeadingTagInfo(title) {
   const t = String(title || '').trim();
-  if (!t.startsWith('/')) return '';
-  const m = t.match(/^\/[^\s　]+/u);
-  return m ? m[0] : '/';
+  if (!t.startsWith('/') && !t.startsWith('\\')) return null;
+  const m = t.match(/^([\/\\])[^\s　]+/u);
+  if (!m) return { tag: t[0], defaultVisible: t[0] === '/' };
+  return { tag: m[0], defaultVisible: m[1] === '/' };
+}
+function extractHeadingTag(title) {
+  const info = extractHeadingTagInfo(title);
+  return info ? info.tag : '';
 }
 function parse(text, mode) {
   if (mode === 'auto') mode = 'dot';
   const lines = normalizeNewlines(text).split("\n");
   const root = { id: "root", title: "全体", level: 0, start: 0, end: lines.length, children: [], parent: null };
   const stack = [root]; let id = 0; const flat = [];
-  const headingTags = []; let tagOverflow = false;
+  const headingTags = []; const headingTagDefaults = {}; let tagOverflow = false;
   for (let i = 0; i < lines.length; i++) {
     const h = detectHeading(lines[i], mode); if (!h) continue;
-    const rawTag = extractHeadingTag(h.title);
+    const tagInfo = extractHeadingTagInfo(h.title);
+    const rawTag = tagInfo ? tagInfo.tag : '';
     let tag = '';
     if (rawTag) {
       if (headingTags.includes(rawTag)) tag = rawTag;
-      else if (headingTags.length < 5) { headingTags.push(rawTag); tag = rawTag; }
+      else if (headingTags.length < 5) { headingTags.push(rawTag); headingTagDefaults[rawTag] = !!tagInfo.defaultVisible; tag = rawTag; }
       else { tagOverflow = true; }
     }
     const node = { id: "n" + (++id), title: h.title || "(無題)", level: Math.max(1, Math.min(9, h.level)), start: i, end: lines.length, children: [], parent: null, marker: h.marker, tag: tag };
@@ -1104,7 +1143,7 @@ function parse(text, mode) {
   }
   while (stack.length) { const closed = stack.pop(); closed.end = lines.length; }
   if (flat.length === 0) { const node = { id: "n1", title: "全文", level: 1, start: 0, end: lines.length, children: [], parent: root, marker: "plain", tag: '' }; root.children.push(node); flat.push(node); }
-  return { root, flat, lines, headingTags, tagOverflow };
+  return { root, flat, lines, headingTags, headingTagDefaults, tagOverflow };
 }
 function nodePath(node) { const p=[]; let n=node; while(n&&n.id!=="root"){p.unshift(n.title); n=n.parent;} return p.join(" / "); }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch])); }
@@ -1216,6 +1255,19 @@ function hideBusyMessage() {
   const box = document.getElementById('busyMessage');
   if (box) box.style.display = 'none';
 }
+function normalizeTabSize(value) {
+  var n = Number(value);
+  return (n === 1 || n === 2 || n === 4 || n === 6 || n === 8 || n === 12 || n === 16) ? n : 4;
+}
+function normalizeMdTableHLine(value) {
+  return value === 'standard' || value === 'none' ? value : 'header';
+}
+function normalizeMdTableVLine(value) {
+  return value === 'standard' || value === 'none' ? value : 'item';
+}
+function markdownTableClass() {
+  return 'md-table md-hline-' + normalizeMdTableHLine(state.settings.mdTableHLine) + ' md-vline-' + normalizeMdTableVLine(state.settings.mdTableVLine);
+}
 function markdownToHtml(src) {
   src = String(src || '').replace(/\r\n?/g, '\n');
 
@@ -1305,7 +1357,7 @@ function markdownToHtml(src) {
       flushPara(); closeLists(out, listState);
       var headers = splitTableRow(line);
       var seps = splitTableRow(lines[i + 1]);
-      out.push('<div class="md-table-scroll"><table><thead><tr>');
+      out.push('<div class="md-table-scroll"><table class="' + markdownTableClass() + '"><thead><tr>');
       for (var h = 0; h < headers.length; h++) out.push('<th' + alignOf(seps[h] || '') + '>' + inlineMd(headers[h]) + '</th>');
       out.push('</tr></thead><tbody>');
       i += 2;
@@ -1427,7 +1479,7 @@ function clearContentCache() {
   if (state.contentCache) state.contentCache.clear();
 }
 function getContentCacheKey(node) {
-  return `${node.id}|${state.settings.viewMode || 'text'}`;
+  return `${node.id}|${state.settings.viewMode || 'text'}|tab${normalizeTabSize(state.settings.tabSize)}|th${normalizeMdTableHLine(state.settings.mdTableHLine)}|tv${normalizeMdTableVLine(state.settings.mdTableVLine)}`;
 }
 function buildContentHtml(node, body) {
   if (state.settings.viewMode === 'text') {
@@ -1788,9 +1840,11 @@ function loadTextCore(text, fileName='', options={}) {
   state.nodes = parsed; state.flat = parsed.flat; state.lines = parsed.lines;
   state.nodeById = new Map(state.flat.map(n => [n.id, n]));
   state.headingLineSet = new Set(parsed.flat.map(n => n.start));
-  state.headingTags = parsed.headingTags || []; state.tagOverflow = !!parsed.tagOverflow;
+  state.headingTags = parsed.headingTags || []; state.headingTagDefaults = parsed.headingTagDefaults || {}; state.tagOverflow = !!parsed.tagOverflow;
   if (!state.settings.tagVisibility) state.settings.tagVisibility = {};
-  for (const tag of state.headingTags) if (typeof state.settings.tagVisibility[tag] !== 'boolean') state.settings.tagVisibility[tag] = false;
+  for (const tag of state.headingTags) {
+    if (typeof state.settings.tagVisibility[tag] !== 'boolean') state.settings.tagVisibility[tag] = state.headingTagDefaults[tag] !== false;
+  }
   collapseAllTreeNodes();
   if (Array.isArray(options.collapsedIds)) {
     state.collapsed = new Set(options.collapsedIds.filter(id => state.nodeById.has(id)));
@@ -1857,7 +1911,7 @@ function saveDocumentSnapshot(reason='auto') {
   if (!state.text) return;
   const isBuiltin = state.currentDocumentSource === 'builtin';
   const payload = {
-    app: 'OTView', version: '2.1j', savedAt: new Date().toISOString(), reason,
+    app: 'OTView', version: '2.2e', savedAt: new Date().toISOString(), reason,
     source: isBuiltin ? 'builtin' : 'user',
     fileName: isBuiltin ? BUILTIN_DOCUMENT_NAME : (state.settings.lastFileName || ''),
     text: isBuiltin ? '' : state.text,
@@ -2288,6 +2342,13 @@ function applySettings(rebuildUi = true) {
   els.mode.value = state.settings.headingMode || 'dot';
   els.colorMode.value = mode;
   if (els.menuMode) els.menuMode.value = state.settings.menuMode || 'right';
+  state.settings.tabSize = normalizeTabSize(state.settings.tabSize);
+  state.settings.mdTableHLine = normalizeMdTableHLine(state.settings.mdTableHLine);
+  state.settings.mdTableVLine = normalizeMdTableVLine(state.settings.mdTableVLine);
+  root.style.setProperty('--ot-tab-size', String(state.settings.tabSize));
+  if (els.tabSize) els.tabSize.value = String(state.settings.tabSize);
+  if (els.mdTableHLine) els.mdTableHLine.value = state.settings.mdTableHLine;
+  if (els.mdTableVLine) els.mdTableVLine.value = state.settings.mdTableVLine;
   if (els.accentColorPicker) els.accentColorPicker.value = normalizeHexColor(state.settings.accentColor || (state.settings.customApp && state.settings.customApp.accent) || (COLOR_THEMES[state.settings.colorMode] && COLOR_THEMES[state.settings.colorMode].app.accent) || '#2563eb');
   updateDetailSettingsAvailability();
   applyMenuMode();
@@ -2326,11 +2387,14 @@ function loadSettings() {
     if (state.settings.colorMode === 'custom') state.settings.colorMode = 'custom1';
     if (!state.settings.customProfiles) state.settings.customProfiles = { custom1: null, custom2: null };
     if (!state.settings.customAppProfiles) state.settings.customAppProfiles = { custom1: null, custom2: null };
-    // v2.1e: 見出しタグ表示の初期値を確実にOFFへ統一するため、旧バージョンからの移行時は保存済みタグ表示状態を破棄する。
-    // v2.1j: Androidで絵文字ルーペが濃い青で描画される問題を避けるため、検索実行ボタンはCSS描画アイコンへ変更。
-    if (!saved.settingsVersion || saved.settingsVersion < 7) state.settings.tagVisibility = {};
+    // v2.2c: 見出しタグに文書側の初期表示指定（/ = 初期ON、\ = 初期OFF）を追加したため、旧方式の保存済みタグ表示状態は一度だけ破棄する。
+    // v2.2: Androidで絵文字ルーペが濃い青で描画される問題を避けるため、検索実行ボタンはCSS描画アイコンへ変更。
+    if (!saved.settingsVersion || saved.settingsVersion < 10) state.settings.tagVisibility = {};
     if (!state.settings.tagVisibility) state.settings.tagVisibility = {};
     state.settings.richViewMode = normalizeRichViewMode(state.settings.richViewMode);
+    state.settings.tabSize = normalizeTabSize(state.settings.tabSize);
+    state.settings.mdTableHLine = normalizeMdTableHLine(state.settings.mdTableHLine);
+    state.settings.mdTableVLine = normalizeMdTableVLine(state.settings.mdTableVLine);
     if (isCustomMode(state.settings.colorMode)) loadCustomProfile(state.settings.colorMode);
     applyResponsiveInitialFontSizes(saved);
     if (saved.settingsVersion !== SETTINGS_VERSION) console.log('OTView settings migrated to Ver.' + SETTINGS_VERSION);
@@ -2341,6 +2405,9 @@ function saveSettings() {
   state.settings.settingsVersion = SETTINGS_VERSION;
   state.settings.headingMode = els.mode.value;
   if (els.menuMode) state.settings.menuMode = els.menuMode.value;
+  if (els.tabSize) state.settings.tabSize = normalizeTabSize(els.tabSize.value);
+  if (els.mdTableHLine) state.settings.mdTableHLine = normalizeMdTableHLine(els.mdTableHLine.value);
+  if (els.mdTableVLine) state.settings.mdTableVLine = normalizeMdTableVLine(els.mdTableVLine.value);
   if (isCustomMode(state.settings.colorMode)) saveCurrentCustomProfile();
   const saved = deepClone(state.settings);
   saved.showResults = false;
@@ -2392,13 +2459,14 @@ function renderHeadingTagSettings() {
   els.headingTagBox.style.display = '';
   if (!state.settings.tagVisibility) state.settings.tagVisibility = {};
   if (!tags.length) {
-    els.headingTagList.innerHTML = '<div class="tagHelp">この文書では / で始まる見出しタグは検出されていません。</div>';
+    els.headingTagList.innerHTML = '<div class="tagHelp">この文書では / または \ で始まる見出しタグは検出されていません。</div>';
     if (els.headingTagWarning) { els.headingTagWarning.style.display = 'none'; els.headingTagWarning.textContent = ''; }
     return;
   }
   els.headingTagList.innerHTML = tags.map(tag => {
     const checked = state.settings.tagVisibility[tag] === true ? ' checked' : '';
-    return `<label class="tagRow"><input type="checkbox" data-tag-toggle="${escapeHtml(tag)}"${checked}><span class="tagName">${escapeHtml(tag)}</span><span class="tagHelp">表示する</span></label>`;
+    const initLabel = state.headingTagDefaults && state.headingTagDefaults[tag] === false ? '初期OFF' : '初期ON';
+    return `<label class="tagRow"><input type="checkbox" data-tag-toggle="${escapeHtml(tag)}"${checked}><span class="tagName">${escapeHtml(tag)}</span><span class="tagHelp">表示する / ${initLabel}</span></label>`;
   }).join('');
   if (els.headingTagWarning) {
     if (state.tagOverflow) {
@@ -2672,7 +2740,7 @@ function showOtInfoPanel() {
   const bodyCount = state.flat ? state.flat.length : 0;
   const textBytes = new Blob([state.text || '']).size;
   setInfoRows([
-    ["Version", "v2.1j"],
+    ["Version", "v2.2e"],
     ['ファイル', fileName],
     ['表示形式', displayModeName(state.settings.viewMode)],
     ['見出し判定', headingDetectionStatus()],
@@ -2705,7 +2773,7 @@ function showOtInfoDetail() {
 }
 function showOtAbout() {
   if (!els.otInfoDetail) return;
-  els.otInfoDetail.innerHTML = '<strong>About OTView</strong><br>Version 2.1j<br>Copyright © 2026 Sugarware<br>Designed by Sugarware<br>Implemented with ChatGPT';
+  els.otInfoDetail.innerHTML = '<strong>About OTView</strong><br>Version 2.2e<br>Copyright © 2026 Sugarware<br>Designed by Sugarware<br>Implemented with ChatGPT';
   els.otInfoDetail.classList.remove('hidden');
 }
 function toggleCurrentNodeOneLevel() {
@@ -2990,6 +3058,18 @@ els.file.addEventListener("change", e => {
 els.mode.addEventListener("change", () => { saveSettings(); if(state.text) loadText(state.text, state.settings.lastFileName || '', { source: state.currentDocumentSource }); });
 els.menuMode.addEventListener("change", () => { state.settings.menuMode = els.menuMode.value; applyMenuMode(); saveSettings(); autosaveTransientState(); });
 els.colorMode.addEventListener("change", () => { setColorMode(els.colorMode.value); applySettings(); updateDetailSettingsAvailability(); saveSettings(); renderTree(); renderContent(currentNode()); renderResults(); });
+function applyMarkdownDisplaySettingsFromUi() {
+  if (els.tabSize) state.settings.tabSize = normalizeTabSize(els.tabSize.value);
+  if (els.mdTableHLine) state.settings.mdTableHLine = normalizeMdTableHLine(els.mdTableHLine.value);
+  if (els.mdTableVLine) state.settings.mdTableVLine = normalizeMdTableVLine(els.mdTableVLine.value);
+  state.contentCache.clear();
+  applySettings(false);
+  saveSettings();
+  renderContent(currentNode());
+}
+if (els.tabSize) els.tabSize.addEventListener("change", applyMarkdownDisplaySettingsFromUi);
+if (els.mdTableHLine) els.mdTableHLine.addEventListener("change", applyMarkdownDisplaySettingsFromUi);
+if (els.mdTableVLine) els.mdTableVLine.addEventListener("change", applyMarkdownDisplaySettingsFromUi);
 let treeTapTimer = null;
 let treeLastTap = { id: null, time: 0 };
 let treeLongPressTimer = null;
@@ -3278,7 +3358,7 @@ if (els.right) els.right.addEventListener('pointerdown', () => setActivePane('ri
 
 
 function resetDocumentSessionStateForNewFile() {
-  // v2.1j: ファイルメニューから新規に開く場合は、文書固有の見出しタグ表示設定を初期化する。
+  // v2.2: ファイルメニューから新規に開く場合は、文書固有の見出しタグ表示設定を初期化する。
   // 復元時はこの関数を通らないため、保存済みのタグ表示状態を維持できる。
   state.settings.tagVisibility = {};
   state.readingDisplayMode = 0;
