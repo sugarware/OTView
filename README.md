@@ -13,8 +13,10 @@ Outline-Text Viewer
 * 階層範囲でのAND検索
 * 可変レイアウト
 * 可変文字サイズ
+* 選べる表の罫線表示
+* PWA対応で、通常アプリっぽく使える
 
-## 🚀[Web上で実行出来ます！](https://sugarware.github.io/OTView)
+## 🚀[Webから実行出来ます！](https://sugarware.github.io/OTView)
 
 
 
