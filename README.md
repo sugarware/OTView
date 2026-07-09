@@ -16,7 +16,9 @@ Outline-Text Viewer
 * 選べる表の罫線表示
 * PWA対応で、通常アプリっぽく使える
 
-## 🚀[Webから実行出来ます！](https://sugarware.github.io/OTView)
+## [ここから実行出来ます！🚀](https://sugarware.github.io/OTView)
+
+ブラウザのメニューから「ホーム画面に追加」を選べば、アプリっぽく使えます
 
 
 
