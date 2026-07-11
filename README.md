@@ -1,4 +1,4 @@
-![スクリーン](https://github.com/sugarware/OTView/blob/main/IMG_0775.png)
+![スクリーン](https://github.com/sugarware/OTView/blob/main/IMG_0820.png)
 # OTView
 Outline-Text Viewer
 
