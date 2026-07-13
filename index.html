@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>OTView v2.2g</title>
+<title>OTView v2.3d</title>
 <style>
 :root {
   --app-bg: #f6f7f9;
@@ -994,7 +994,6 @@ main.layoutVertical #treeResultSplitter.dragging::after {
   <div class="fileMenuTitle">ファイルメニュー</div>
   <div id="fileMenuStatus" class="fileMenuStatus">現在：ユーザー文書</div>
   <button type="button" data-file-menu-action="open">ファイルを開く<span class="menuHelp">ユーザー文書を開きます。</span></button>
-  <button type="button" data-file-menu-action="url">URLを開く<span class="menuHelp">GitHub等のWeb文書を開きます。</span></button>
   <button type="button" data-file-menu-action="reload">再読込<span class="menuHelp">Web文書は自動更新、ローカル文書はファイル名をコピーして選択します。</span></button>
   <button id="fileMenuSwitchDocument" type="button" data-file-menu-action="switch">初めてガイドへ切替<span class="menuHelp">内蔵ガイドとユーザー文書を切り替えます。</span></button>
   <div class="fileMenuFooter"><button id="fileMenuClose" type="button" data-file-menu-action="close">閉じる</button></div>
@@ -1008,7 +1007,7 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 
 <div id="otInfoOverlay" class="otInfoOverlay hidden" role="dialog" aria-modal="true" aria-label="OTView情報">
   <div class="otInfoPanel">
-    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.2g</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
+    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.3d</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
     <div id="otInfoBody" class="otInfoRows"></div>
     <div class="otInfoSep"></div>
     <div id="otInfoDetail" class="otInfoSmall hidden"></div>
@@ -1025,8 +1024,10 @@ const DOC_STORAGE_KEY = "wzViewerV20LastUserDocument";
 const BUILTIN_DOC_STORAGE_KEY = "wzViewerV20BuiltinGuideState";
 const STARTUP_DONE_KEY = "wzViewerV20FirstRunCompleted";
 const BUILTIN_DOCUMENT_NAME = "OTView はじめてガイド";
-const BUILTIN_DOCUMENT_TEXT = ".OTView はじめてガイド\n\nVersion 1.6\n対応版：OTView v2.2g\n\nようこそ、OTViewへ。\n\nこのガイドは、OTViewのすべての機能を説明するものではありません。\n初めて使う方が、安心して使い始められるように書かれています。\n\nまずは実際に触ってみてください。\n分からないことがあれば、このガイドに戻ってきましょう。\n\n⸻\n\n..1 OTViewとは\n\n...1.1 OTViewでできること\n\nOTViewは、階層構造を持つ文書を快適に読むためのビューアです。\n\n長い文書でも、見出しをたどりながら目的の情報へ素早く移動できます。\n\nまた、検索やMarkdown表示などを利用することで、知識ベースやマニュアルも読みやすく表示できます。\n\nOTViewは、「探して読む」に特化したシンプルなツールです。\n\n⸻\n\n...1.2 このガイドの読み方\n\n最初は順番に読んでください。\n\n読み終えたら、ぜひ自分の文書やMarkdown形式の文書を開いて試してみてください。\n\n実際に触りながら覚えることが、OTViewを使いこなす一番の近道です。\n\n⸻\n\n..2 まず画面を見てみよう\n\n...2.1 3つのペーン\n\nOTViewの画面は、主に3つのペーンで構成されています。\n\n|ペーン|機能|\n|:--------|:-----|\n|階層　|文書全体の構造を表示します<br>読みたい項目を選ぶための案内役です |\n|本文　|選択した項目の本文を表示します<br>読む時間のほとんどはこのペーンを使います|\n|拡張　|検索で見つかった項目を一覧表示します<br>検索結果から直接本文へ移動できます|\n\n表示設定によって、ペーンの並び方は変えられます。\n\n⸻\n\n...2.2 上部のボタン\n\nOTViewの上部には、よく使うボタンが並んでいます。\n殆どのボタンは長押しすれば説明が表示されますので\n\n## 『迷ったら長押し』\n\nと覚えましょう！\n\n\n|ボタン|機能|\n|:--------|:-----|\n|拡張　|拡張メニューや拡張ペーンを表示します|\n|TXT   |本文の表示形式を、Text／(Markdown／HTML)表示間で切り替えます|\n|A±     |アクティブペーン*の文字サイズをそれぞれ調整します|\n|表示　|本文だけを大きく表示したり、左右表示／上下表示を切り替えたりします|\n|設定　|文書を開く、配色を変える、見出し判定を選ぶなどの設定を行います|\n\n*アクティブペーンとは、カラー枠で囲まれてるペーンです。\n\n細かい機能は「長押し」を活用して確認しながら、気軽に試して慣れましょう！\n\n⸻\n\n...2.3 共通する操作\n\nOTViewでは、多くのボタンが共通した考え方で動作します。\n\n|操作　　　　　|機能|\n|:-------------------|:-----|\n|タップ　　　　|基本操作|\n|ダブルタップ　|関連する別操作|\n|長押し　　　　|そのボタンの説明|\n\nすべてのボタンで必ず同じ動作になるわけではありませんが、まずはこの考え方で触ると理解しやすくなります。\n\nOTViewはビューアですから、どんな操作をしても文書の内容は変更されません。\n安心していろいろ試してみてください。\n\n⸻\n\n...2.4 まず試してみよう\n\nここまで読んだら、実際に操作してみましょう。\n\nまずは、次の操作を試してください。\n\n* 設定から文書ファイルを開く\n* 階層を開く\n* 項目を選ぶ\n* 本文を読む\n* 表示ボタンを押してみる\n* A±ボタンを押してみる\n\nこれだけでOTViewの基本的な使い方は体験できます。\n\n細かい機能は、必要になったときに少しずつ覚えれば十分です。\n\n⸻\n\n..3 文書を読んでみよう\n\n...3.1 階層から読む\n\nOTViewでは、まず階層ペーンから読みたい項目を選びます。\n\n長い文書でも、必要な場所へ素早く移動できます。\n\n階層表示の▶や▼をタップすれば、階層が開いたり閉じたりします。\n\n読み終えたら別の項目を選ぶだけです。\n\nページをめくる感覚ではなく、目次から直接目的の場所へ移動する感覚で利用してください。\n\n⸻\n\n...3.2 検索を使う\n\n読みたい内容を探し出したいときは、検索を利用すると便利です。\n\n拡張ボタンを押して拡張メニューを表示し、検索文字を入力してからルーペボタンをタップ/ダブルタップします。\n\n検索すると、該当する項目が拡張ペーンへ一覧表示されます。\n\n拡張ペーンが表示されていないときは、拡張ボタンや表示ボタンで表示できます。\n\n気になる項目を選ぶだけで本文へ移動できます。\n\n検索結果は、自分で作る一時的な索引のようにも使えます。\n長い文書ほど検索の効果を実感できます。\n\n⸻\n\n...3.3 見出しタグを使った文書\n\n文書によっては、`/作者メモ` や `/補足` のような見出しタグが使われていることがあります。\n\n見出しタグは、情報の種類を表す目印です。\n\n設定でタグごとに表示／非表示を切り替えられるため、自分に必要な情報だけを表示して読むことができます。\n\n詳しい使い方は、機能リファレンス(%作成予定)で確認してください。\n\n\n..../3.3.1 まずは\nこの見出しタグは、デフォルトで表示Onとなります。\n最初は読んで欲しいが、後で非表示にしても良い内容に向いています。\n\n見えてない見出しタグは、設定で表示Onにできます。\n\n....\\3.3.2 慣れたら\nこの見出しタグは、デフォルトで表示Offとなります。\n最初は読む必要がないが、慣れてきたら読んでも良い内容に向いています。\n\n⸻\n\n...3.4 OTViewらしい読み方\n\nOTViewには、決まった読み方はありません。\n\n階層から読んでも、検索から読んでも構いません。\n\n目的に合わせて自由に使い分けてください。\n\n読み進めるうちに、自分に合った使い方が見つかるでしょう。\n\n⸻\n\n..4 表示を自分好みにする\n\n...4.1 ペーンの広さ\n\nペーンの境界は自由に調整できます。\n\n本文を広くしたいときは本文ペーンを、階層を見やすくしたいときは階層ペーンを広げてみてください。\n\n階層ペーンと拡張ペーンの境界も調整できます。\n\n文書によって、読みやすい配置は変わります。\n\n⸻\n\n...4.2 表示ボタン\n\n表示ボタンは、本文を広く読みたいときに便利です。\n\nタップすると、本文だけの表示をON／OFFできます。\n\nダブルタップすると、左右表示と上下表示を切り替えます。\n\n長押しすると、説明が出ます。\n\nまずはタップだけ覚えれば十分です。\n\n⸻\n\n...4.3 TXTボタン\n\nTXTボタンは、本文の表示形式を切り替えるためのボタンです。\n\nText表示、Markdown表示、HTML表示を使い分けられます。\n\n通常のテキスト文書なら、まずは初期状態のままで構いません。\n\nMarkdown形式の文書では、表やリストが見やすく表示されます。\n\n⸻\n\n...4.4 A±ボタン\n\nA±ボタンは、文字サイズを変更するためのボタンです。\n\n対象となるのはアクセント・カラーの枠線で囲まれたペーン(アクティブペーン)の文字です。\n\nタップで拡大、ダブルタップで縮小します。\n\n長押しでは一覧の値から選択したポイントに設定出来ます。\n\n⸻\n\n...4.5 設定\n\n設定では、文書ファイルを開いたり、表示を調整したりできます。\n\n主な設定には、次のようなものがあります。\n\n* 新規ファイルを開く\n* 読み込まれているファイルを切り替える\n\n* 配色\n* アクセントカラー\n* 見出し判定\n* 利き手\n* Tab幅\n* Markdown表の罫線表示\n* 見出しタグの表示\n* 詳細設定\n\n読みにくいと感じたら、自分に合った表示へ調整してください。\n\n設定はいつでも変更できます。\n\n⸻\n\n..5 OTViewをもっと活用する\n\n...5.1 自分専用の知識ベース\n\nOTViewは、自分で育てていく知識ベースとの相性が良いビューアです。\n\n調べたことや経験を一つの文書へまとめておくと、必要になったときすぐに探し出せます。\n\n階層で整理し、検索で横断することで、知識を効率よく活用できます。\n\n⸻\n\n...5.2 他の利用例\n\nOTViewは、知識ベース以外にも利用できます。\n\n例えば、次のような文書です。\n\n* ユーザーズマニュアル\n* 技術資料\n* 学習教材\n* 読書ノート\n* 日記\n\n構造化された文書であれば、OTViewで快適に読むことができます。\n\n⸻\n\n..6 次にやってみよう\n\nここまで読めば、OTViewの基本的な使い方は分かります。\n\n次は、自分の文書を開いて試してみてください。\n\nまずは、次の操作だけで十分です。\n\n* 階層をたどる\n* 本文を読む\n* 検索する\n* 表示を切り替える\n* 文字サイズを変える\n\n分からない機能があれば「機能リファレンス」を、OTView向けの文書を書きたくなったら「文書作成ガイド」を利用してください。\n\nOTViewは、使いながら少しずつ慣れていくツールです。\n\nまずは気軽に触ってみましょう。\n";
+const BUILTIN_DOCUMENT_TEXT = ".OTView はじめてガイド\n\nVersion 1.6\n対応版：OTView v2.3d\n\nようこそ、OTViewへ。\n\nこのガイドは、OTViewのすべての機能を説明するものではありません。\n初めて使う方が、安心して使い始められるように書かれています。\n\nまずは実際に触ってみてください。\n分からないことがあれば、このガイドに戻ってきましょう。\n\n⸻\n\n..1 OTViewとは\n\n...1.1 OTViewでできること\n\nOTViewは、階層構造を持つ文書を快適に読むためのビューアです。\n\n長い文書でも、見出しをたどりながら目的の情報へ素早く移動できます。\n\nまた、検索やMarkdown表示などを利用することで、知識ベースやマニュアルも読みやすく表示できます。\n\nOTViewは、「探して読む」に特化したシンプルなツールです。\n\n⸻\n\n...1.2 このガイドの読み方\n\n最初は順番に読んでください。\n\n読み終えたら、ぜひ自分の文書やMarkdown形式の文書を開いて試してみてください。\n\n実際に触りながら覚えることが、OTViewを使いこなす一番の近道です。\n\n⸻\n\n..2 まず画面を見てみよう\n\n...2.1 3つのペーン\n\nOTViewの画面は、主に3つのペーンで構成されています。\n\n|ペーン|機能|\n|:--------|:-----|\n|階層　|文書全体の構造を表示します<br>読みたい項目を選ぶための案内役です |\n|本文　|選択した項目の本文を表示します<br>読む時間のほとんどはこのペーンを使います|\n|拡張　|検索で見つかった項目を一覧表示します<br>検索結果から直接本文へ移動できます|\n\n表示設定によって、ペーンの並び方は変えられます。\n\n⸻\n\n...2.2 上部のボタン\n\nOTViewの上部には、よく使うボタンが並んでいます。\n殆どのボタンは長押しすれば説明が表示されますので\n\n## 『迷ったら長押し』\n\nと覚えましょう！\n\n\n|ボタン|機能|\n|:--------|:-----|\n|拡張　|拡張メニューや拡張ペーンを表示します|\n|TXT   |本文の表示形式を、Text／(Markdown／HTML)表示間で切り替えます|\n|A±     |アクティブペーン*の文字サイズをそれぞれ調整します|\n|表示　|本文だけを大きく表示したり、左右表示／上下表示を切り替えたりします|\n|設定　|文書を開く、配色を変える、見出し判定を選ぶなどの設定を行います|\n\n*アクティブペーンとは、カラー枠で囲まれてるペーンです。\n\n細かい機能は「長押し」を活用して確認しながら、気軽に試して慣れましょう！\n\n⸻\n\n...2.3 共通する操作\n\nOTViewでは、多くのボタンが共通した考え方で動作します。\n\n|操作　　　　　|機能|\n|:-------------------|:-----|\n|タップ　　　　|基本操作|\n|ダブルタップ　|関連する別操作|\n|長押し　　　　|そのボタンの説明|\n\nすべてのボタンで必ず同じ動作になるわけではありませんが、まずはこの考え方で触ると理解しやすくなります。\n\nOTViewはビューアですから、どんな操作をしても文書の内容は変更されません。\n安心していろいろ試してみてください。\n\n⸻\n\n...2.4 まず試してみよう\n\nここまで読んだら、実際に操作してみましょう。\n\nまずは、次の操作を試してください。\n\n* 設定から文書ファイルを開く\n* 階層を開く\n* 項目を選ぶ\n* 本文を読む\n* 表示ボタンを押してみる\n* A±ボタンを押してみる\n\nこれだけでOTViewの基本的な使い方は体験できます。\n\n細かい機能は、必要になったときに少しずつ覚えれば十分です。\n\n⸻\n\n..3 文書を読んでみよう\n\n...3.1 階層から読む\n\nOTViewでは、まず階層ペーンから読みたい項目を選びます。\n\n長い文書でも、必要な場所へ素早く移動できます。\n\n階層表示の▶や▼をタップすれば、階層が開いたり閉じたりします。\n\n読み終えたら別の項目を選ぶだけです。\n\nページをめくる感覚ではなく、目次から直接目的の場所へ移動する感覚で利用してください。\n\n⸻\n\n...3.2 検索を使う\n\n読みたい内容を探し出したいときは、検索を利用すると便利です。\n\n拡張ボタンを押して拡張メニューを表示し、検索文字を入力してからルーペボタンをタップ/ダブルタップします。\n\n検索すると、該当する項目が拡張ペーンへ一覧表示されます。\n\n拡張ペーンが表示されていないときは、拡張ボタンや表示ボタンで表示できます。\n\n気になる項目を選ぶだけで本文へ移動できます。\n\n検索結果は、自分で作る一時的な索引のようにも使えます。\n長い文書ほど検索の効果を実感できます。\n\n⸻\n\n...3.3 見出しタグを使った文書\n\n文書によっては、`/作者メモ` や `/補足` のような見出しタグが使われていることがあります。\n\n見出しタグは、情報の種類を表す目印です。\n\n設定でタグごとに表示／非表示を切り替えられるため、自分に必要な情報だけを表示して読むことができます。\n\n詳しい使い方は、機能リファレンス(%作成予定)で確認してください。\n\n\n..../3.3.1 まずは\nこの見出しタグは、デフォルトで表示Onとなります。\n最初は読んで欲しいが、後で非表示にしても良い内容に向いています。\n\n見えてない見出しタグは、設定で表示Onにできます。\n\n....\\3.3.2 慣れたら\nこの見出しタグは、デフォルトで表示Offとなります。\n最初は読む必要がないが、慣れてきたら読んでも良い内容に向いています。\n\n⸻\n\n...3.4 OTViewらしい読み方\n\nOTViewには、決まった読み方はありません。\n\n階層から読んでも、検索から読んでも構いません。\n\n目的に合わせて自由に使い分けてください。\n\n読み進めるうちに、自分に合った使い方が見つかるでしょう。\n\n⸻\n\n..4 表示を自分好みにする\n\n...4.1 ペーンの広さ\n\nペーンの境界は自由に調整できます。\n\n本文を広くしたいときは本文ペーンを、階層を見やすくしたいときは階層ペーンを広げてみてください。\n\n階層ペーンと拡張ペーンの境界も調整できます。\n\n文書によって、読みやすい配置は変わります。\n\n⸻\n\n...4.2 表示ボタン\n\n表示ボタンは、本文を広く読みたいときに便利です。\n\nタップすると、本文だけの表示をON／OFFできます。\n\nダブルタップすると、左右表示と上下表示を切り替えます。\n\n長押しすると、説明が出ます。\n\nまずはタップだけ覚えれば十分です。\n\n⸻\n\n...4.3 TXTボタン\n\nTXTボタンは、本文の表示形式を切り替えるためのボタンです。\n\nText表示、Markdown表示、HTML表示を使い分けられます。\n\n通常のテキスト文書なら、まずは初期状態のままで構いません。\n\nMarkdown形式の文書では、表やリストが見やすく表示されます。\n\n⸻\n\n...4.4 A±ボタン\n\nA±ボタンは、文字サイズを変更するためのボタンです。\n\n対象となるのはアクセント・カラーの枠線で囲まれたペーン(アクティブペーン)の文字です。\n\nタップで拡大、ダブルタップで縮小します。\n\n長押しでは一覧の値から選択したポイントに設定出来ます。\n\n⸻\n\n...4.5 設定\n\n設定では、文書ファイルを開いたり、表示を調整したりできます。\n\n主な設定には、次のようなものがあります。\n\n* 新規ファイルを開く\n* 読み込まれているファイルを切り替える\n\n* 配色\n* アクセントカラー\n* 見出し判定\n* 利き手\n* Tab幅\n* Markdown表の罫線表示\n* 見出しタグの表示\n* 詳細設定\n\n読みにくいと感じたら、自分に合った表示へ調整してください。\n\n設定はいつでも変更できます。\n\n⸻\n\n..5 OTViewをもっと活用する\n\n...5.1 自分専用の知識ベース\n\nOTViewは、自分で育てていく知識ベースとの相性が良いビューアです。\n\n調べたことや経験を一つの文書へまとめておくと、必要になったときすぐに探し出せます。\n\n階層で整理し、検索で横断することで、知識を効率よく活用できます。\n\n⸻\n\n...5.2 他の利用例\n\nOTViewは、知識ベース以外にも利用できます。\n\n例えば、次のような文書です。\n\n* ユーザーズマニュアル\n* 技術資料\n* 学習教材\n* 読書ノート\n* 日記\n\n構造化された文書であれば、OTViewで快適に読むことができます。\n\n⸻\n\n..6 次にやってみよう\n\nここまで読めば、OTViewの基本的な使い方は分かります。\n\n次は、自分の文書を開いて試してみてください。\n\nまずは、次の操作だけで十分です。\n\n* 階層をたどる\n* 本文を読む\n* 検索する\n* 表示を切り替える\n* 文字サイズを変える\n\n分からない機能があれば「機能リファレンス」を、OTView向けの文書を書きたくなったら「文書作成ガイド」を利用してください。\n\nOTViewは、使いながら少しずつ慣れていくツールです。\n\nまずは気軽に触ってみましょう。\n";
 const SETTINGS_VERSION = 10;
+// v2.3d: 大規模文書向け階層DOM管理。文書先頭移動を追加し、URL直接読込メニューを削除。
+const TREE_DOM_SOFT_LIMIT = 500;
 const FONT_PRESETS = [
   { name: 'システム標準（推奨）', value: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif', hint: '端末の標準表示。迷ったらこれが無難です。' },
   { name: '読みやすいゴシック', value: '"Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif', hint: '本文・メニュー向きの一般的なゴシック体です。' },
@@ -1079,7 +1080,7 @@ function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
 const state = {
   text: "", lines: [], nodes: [], flat: [], activeId: null, collapsed: new Set(), query: "",
   matches: [], currentMatchIndex: -1, settings: deepClone(defaultSettings), readingDisplayMode: 0, lastSplitMode: 0, headingTags: [], headingTagDefaults: {}, tagOverflow: false,
-  searchScope: 'subtree', searchMenuVisible: false, activePane: 'right', currentDocumentSource: 'builtin', currentFile: null, currentFileName: '', currentFileLastModified: 0, currentDocumentUrl: '', pendingReloadFileSelection: null, headingLineSet: new Set(), nodeById: new Map(), contentCache: new Map(), autosaveTimer: null
+  searchScope: 'subtree', searchMenuVisible: false, activePane: 'right', currentDocumentSource: 'builtin', currentFile: null, currentFileName: '', currentFileLastModified: 0, currentDocumentUrl: '', pendingReloadFileSelection: null, headingLineSet: new Set(), nodeById: new Map(), contentCache: new Map(), autosaveTimer: null, treeDomLimitBypass: false
 };
 const els = {
   appTitle: document.getElementById("appTitle"),
@@ -1211,6 +1212,113 @@ function nearestVisibleAncestor(node) {
     n = n.parent;
   }
   return firstVisibleNode();
+}
+// ---- v2.3d large-document tree resource manager ----
+function visibleTreeChildren(node) { return (node && node.children ? node.children : []).filter(isNodeVisible); }
+function isTreeNodeExpanded(node) {
+  return !!(node && node.id !== 'root' && visibleTreeChildren(node).length && !state.collapsed.has(node.id));
+}
+function countDisplayedTreeNodes() {
+  let count = 0;
+  function walk(nodes) {
+    for (const n of nodes || []) {
+      if (!isNodeVisible(n)) continue;
+      count++;
+      if (!state.collapsed.has(n.id)) walk(n.children);
+    }
+  }
+  walk(state.nodes.root ? state.nodes.root.children : []);
+  return count;
+}
+function countDisplayedSubtree(node) {
+  if (!node || !isNodeVisible(node)) return 0;
+  let count = 1;
+  if (!state.collapsed.has(node.id)) {
+    for (const child of visibleTreeChildren(node)) count += countDisplayedSubtree(child);
+  }
+  return count;
+}
+function nodeAncestorIds(node) {
+  const ids = new Set();
+  let n = node;
+  while (n && n.id !== 'root') { ids.add(n.id); n = n.parent; }
+  return ids;
+}
+function treeDistance(a, b) {
+  if (!a || !b) return Number.MAX_SAFE_INTEGER;
+  const fromA = new Map();
+  let n = a, d = 0;
+  while (n) { fromA.set(n.id, d++); n = n.parent; }
+  n = b; d = 0;
+  while (n) {
+    if (fromA.has(n.id)) return d + fromA.get(n.id);
+    n = n.parent; d++;
+  }
+  return Number.MAX_SAFE_INTEGER;
+}
+function hasExpandedDescendant(node) {
+  for (const child of visibleTreeChildren(node)) {
+    if (isTreeNodeExpanded(child) || hasExpandedDescendant(child)) return true;
+  }
+  return false;
+}
+function organizeTreeAround(focusNode, limit=TREE_DOM_SOFT_LIMIT, options={}) {
+  const honorBypass = options.honorBypass !== false;
+  if ((honorBypass && state.treeDomLimitBypass) || countDisplayedTreeNodes() <= limit) return 0;
+  const focus = focusNode || currentNode();
+  const protectedIds = nodeAncestorIds(focus);
+  const flatIndex = new Map((state.flat || []).map((n, i) => [n.id, i]));
+  const focusIndex = flatIndex.get(focus && focus.id) ?? 0;
+  let closed = 0;
+  let guard = 0;
+  while (countDisplayedTreeNodes() > limit && guard++ < (state.flat.length + 10)) {
+    let candidates = [];
+    for (const n of state.flat || []) {
+      if (!isNodeVisible(n) || !isTreeNodeExpanded(n) || protectedIds.has(n.id)) continue;
+      const reduction = countDisplayedSubtree(n) - 1;
+      if (reduction <= 0) continue;
+      candidates.push({
+        node: n,
+        documentDistance: Math.abs((flatIndex.get(n.id) ?? 0) - focusIndex),
+        treeDistance: treeDistance(focus, n),
+        terminal: !hasExpandedDescendant(n),
+        reduction
+      });
+    }
+    if (!candidates.length) break;
+    const terminalCandidates = candidates.filter(c => c.terminal);
+    if (terminalCandidates.length) candidates = terminalCandidates;
+    candidates.sort((a,b) =>
+      (b.documentDistance - a.documentDistance) ||
+      (b.treeDistance - a.treeDistance) ||
+      (b.node.level - a.node.level) ||
+      (b.reduction - a.reduction)
+    );
+    state.collapsed.add(candidates[0].node.id);
+    closed++;
+  }
+  return closed;
+}
+function projectedDisplayedCountAfterSubtreeExpand(node) {
+  const saved = new Set(state.collapsed);
+  state.collapsed.delete(node.id);
+  setSubtreeCollapsed(node, false);
+  const count = countDisplayedTreeNodes();
+  state.collapsed = saved;
+  return count;
+}
+function askLargeTreeExpansion(projectedCount) {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:10020;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;padding:18px;';
+    const box = document.createElement('div');
+    box.style.cssText = 'width:min(520px,100%);padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);box-shadow:0 14px 40px rgba(0,0,0,.28);';
+    box.innerHTML = `<div style="font-weight:700;font-size:17px;margin-bottom:10px">多数の見出しを開きます</div><div style="line-height:1.65;margin-bottom:14px">約 ${projectedCount} 件の見出しが表示されます。<br>操作速度と閲覧性を保つため、現在位置を中心に整理して開くことを推奨します。</div><div style="display:grid;gap:8px"><button data-choice="organized" class="primary">現在位置中心に整理して開く（推奨）</button><button data-choice="all">そのまま全部開く</button><button data-choice="cancel">キャンセル</button></div>`;
+    overlay.appendChild(box); document.body.appendChild(overlay);
+    function finish(choice) { overlay.remove(); resolve(choice); }
+    box.addEventListener('click', e => { const b=e.target.closest('[data-choice]'); if (b) finish(b.dataset.choice); });
+    overlay.addEventListener('click', e => { if (e.target === overlay) finish('cancel'); });
+  });
 }
 function renderTree() { const count = visibleNodes().length; els.left.innerHTML = `<div class="meta">見出し ${count} 件</div><ul class="tree">${renderChildren(state.nodes.root ? state.nodes.root.children : [])}</ul>`; }
 function renderChildren(children) { return children.filter(isNodeVisible).map(renderNodeLi).join(""); }
@@ -1646,10 +1754,11 @@ function updateHitCounter() { const total=state.matches.length; els.hitCounter.t
 function jumpToHit(index) {
   if (!state.matches.length) return; const total = state.matches.length; state.currentMatchIndex = ((index % total) + total) % total;
   const m = state.matches[state.currentMatchIndex]; const node = findNode(m.nodeId); if (!node || !isNodeVisible(node)) return;
-  expandAncestors(node); renderTree(); renderResults(); updateHitCounter(); renderContent(node, true); scrollActiveTreeNodeIntoView(); autosaveTransientState();
+  expandAncestors(node); state.treeDomLimitBypass = false; organizeTreeAround(node, TREE_DOM_SOFT_LIMIT, { honorBypass:false }); renderTree(); renderResults(); updateHitCounter(); renderContent(node, true); scrollActiveTreeNodeIntoView(); autosaveTransientState();
 }
 function expandAncestors(node) { let n=node.parent; while(n && n.id !== 'root') { state.collapsed.delete(n.id); n=n.parent; } }
 function collapseAllTreeNodes() {
+  state.treeDomLimitBypass = false;
   state.collapsed.clear();
   for (const n of state.flat || []) {
     if (n.children && n.children.length) state.collapsed.add(n.id);
@@ -1833,6 +1942,7 @@ function loadText(text, fileName='', options={}) {
   }, 20);
 }
 function loadTextCore(text, fileName='', options={}) {
+  state.treeDomLimitBypass = false;
   if (options.source) setDocumentSource(options.source, false);
   state.text = text;
   clearContentCache();
@@ -1865,7 +1975,7 @@ function loadTextCore(text, fileName='', options={}) {
   }
   const targetNode = options.activeId ? findNode(options.activeId) : null;
   const initialNode = (targetNode && isNodeVisible(targetNode)) ? targetNode : firstVisibleNode();
-  if (initialNode) expandAncestors(initialNode);
+  if (initialNode) { expandAncestors(initialNode); organizeTreeAround(initialNode, TREE_DOM_SOFT_LIMIT, { honorBypass:false }); }
   renderTree();
   renderContent(initialNode);
   if (options.query !== undefined) {
@@ -1914,7 +2024,7 @@ function saveDocumentSnapshot(reason='auto') {
   if (!state.text) return;
   const isBuiltin = state.currentDocumentSource === 'builtin';
   const payload = {
-    app: 'OTView', version: '2.2g', savedAt: new Date().toISOString(), reason,
+    app: 'OTView', version: '2.3d', savedAt: new Date().toISOString(), reason,
     source: isBuiltin ? 'builtin' : 'user',
     fileName: isBuiltin ? BUILTIN_DOCUMENT_NAME : (state.settings.lastFileName || ''),
     text: isBuiltin ? '' : state.text,
@@ -2743,7 +2853,7 @@ function showOtInfoPanel() {
   const bodyCount = state.flat ? state.flat.length : 0;
   const textBytes = new Blob([state.text || '']).size;
   setInfoRows([
-    ["Version", "v2.2g"],
+    ["Version", "v2.3d"],
     ['ファイル', fileName],
     ['表示形式', displayModeName(state.settings.viewMode)],
     ['見出し判定', headingDetectionStatus()],
@@ -2776,7 +2886,7 @@ function showOtInfoDetail() {
 }
 function showOtAbout() {
   if (!els.otInfoDetail) return;
-  els.otInfoDetail.innerHTML = '<strong>About OTView</strong><br>Version 2.2g<br>Copyright © 2026 Sugarware<br>Designed by Sugarware<br>Implemented with ChatGPT';
+  els.otInfoDetail.innerHTML = '<strong>About OTView</strong><br>Version 2.3d<br>Copyright © 2026 Sugarware<br>Designed by Sugarware<br>Implemented with ChatGPT';
   els.otInfoDetail.classList.remove('hidden');
 }
 function toggleCurrentNodeOneLevel() {
@@ -3004,12 +3114,7 @@ function loadUrlDocument(url, options={}) {
     closeSettingsPanel();
   });
 }
-function openUrlDialog() {
-  const current = state.currentDocumentUrl || '';
-  const url = prompt('GitHub Raw URL または https URL を入力してください。\nGitHubの blob URL は自動で raw URL に変換します。', current);
-  if (url === null) return;
-  loadUrlDocument(url, { resetSession: true });
-}
+
 function copyTextToClipboard(text) {
   const value = String(text || '');
   if (!value) return;
@@ -3091,12 +3196,14 @@ function setSubtreeCollapsed(node, collapsed) {
   }
 }
 function closeNodeOneLevel(node) {
+  state.treeDomLimitBypass = false;
   if (!node || !node.children || !node.children.length) return;
   state.collapsed.add(node.id);
   if (!updateTreeNodeDom(node)) renderTree();
   autosaveTransientState();
 }
 function closeNodeSubtree(node) {
+  state.treeDomLimitBypass = false;
   if (!node || !node.children || !node.children.length) return;
   state.collapsed.add(node.id);
   setSubtreeCollapsed(node, true);
@@ -3113,6 +3220,7 @@ function focusSiblingNodes(node) {
     }
   }
   state.collapsed.delete(node.id);
+  organizeTreeAround(node);
   changed.push(node);
   if (!updateTreeNodesDom(changed)) renderTree();
   scrollActiveTreeNodeIntoView();
@@ -3160,8 +3268,25 @@ function showCycleContextMenu(menu, x, y) {
   menu.style.top = top + 'px';
 }
 
+function moveToDocumentTop() {
+  const node = firstVisibleNode();
+  if (!node) return;
+  renderContent(node);
+  requestAnimationFrame(() => {
+    if (els.left) {
+      if (typeof els.left.scrollTo === 'function') els.left.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      else els.left.scrollTop = 0;
+    }
+    if (els.right) {
+      if (typeof els.right.scrollTo === 'function') els.right.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      else els.right.scrollTop = 0;
+    }
+  });
+  autosaveTransientState();
+}
+
 const BUTTON_HELP_SPECS = {
-  appTitle: { title: 'OTView', summary: '階層をOpen/Closeします。', ops: [['タップ', 'フォーカス中の階層以下だけを開閉（トグル）'], ['ダブルタップ', '全階層を開閉（トグル）'], ['長押し', '説明表示（各種情報表示も可能）']], actions: [{ label: '各種情報を表示', action: 'ot-info' }] },
+  appTitle: { title: 'OTView', summary: '階層をOpen/Closeします。', ops: [['タップ', 'フォーカス中の階層以下だけを開閉（トグル）'], ['ダブルタップ', '全階層を開閉（トグル）'], ['長押し', '説明表示（文書先頭への移動や各種情報表示も可能）']], actions: [{ label: '文書先頭へ', action: 'document-top' }, { label: '各種情報を表示', action: 'ot-info' }] },
   searchToggle: { title: '拡張', summary: '文字列の検索環境を制御します。', ops: [['タップ', '拡張メニューの表示／非表示'], ['ダブルタップ', '拡張ペーンの表示／非表示'], ['長押し', '説明表示']] },
   viewMode: { title: 'TXT', summary: '本文の表示形式を切り替えます。', ops: [['タップ', 'TXT／(MDまたはHTML)の切り替え（トグル）'], ['ダブルタップ', 'MD／HTMの切り替え（TXTモード時は表示は変わりません）'], ['長押し', '説明表示']] },
   fontSize: { title: 'A±', summary: 'アクティブペーンの文字サイズを変更します。アクティブペーンは目立つ色の枠で示されます。', ops: [['タップ', '文字サイズを拡大'], ['ダブルタップ', '文字サイズを縮小'], ['長押し', '説明表示（サイズ一覧から選択可能）']], fontSizeChoices: true },
@@ -3246,20 +3371,37 @@ function cancelTreeLongPress() {
   document.querySelectorAll('.twisty.longpressing').forEach(el => el.classList.remove('longpressing'));
 }
 function toggleNodeOneLevel(node) {
-  if (!node || !node.children || !node.children.length) return;
-  if (state.collapsed.has(node.id)) state.collapsed.delete(node.id);
-  else state.collapsed.add(node.id);
-  if (!updateTreeNodeDom(node)) renderTree();
-  autosaveTransientState();
-}
-function toggleNodeSubtree(node) {
+  state.treeDomLimitBypass = false;
   if (!node || !node.children || !node.children.length) return;
   const expanding = state.collapsed.has(node.id);
-  if (expanding) state.collapsed.delete(node.id);
-  else state.collapsed.add(node.id);
-  setSubtreeCollapsed(node, !expanding);
-  if (!updateTreeNodeDom(node)) renderTree();
+  if (expanding) {
+    state.collapsed.delete(node.id);
+    organizeTreeAround(node);
+  } else state.collapsed.add(node.id);
+  renderTree();
+  scrollActiveTreeNodeIntoView();
   autosaveTransientState();
+}
+async function toggleNodeSubtree(node) {
+  if (!node || !node.children || !node.children.length) return;
+  const expanding = state.collapsed.has(node.id);
+  if (!expanding) {
+    state.collapsed.add(node.id);
+    setSubtreeCollapsed(node, true);
+    renderTree(); autosaveTransientState(); return;
+  }
+  const projected = projectedDisplayedCountAfterSubtreeExpand(node);
+  let choice = 'organized';
+  if (projected > TREE_DOM_SOFT_LIMIT) choice = await askLargeTreeExpansion(projected);
+  if (choice === 'cancel') return;
+  state.collapsed.delete(node.id);
+  setSubtreeCollapsed(node, false);
+  state.treeDomLimitBypass = choice === 'all';
+  if (choice === 'organized') organizeTreeAround(node);
+  renderTree();
+  scrollActiveTreeNodeIntoView();
+  autosaveTransientState();
+  state.treeDomLimitBypass = false;
 }
 els.left.addEventListener("pointerdown", e => {
   const twisty = e.target.closest('.twisty');
@@ -3318,6 +3460,11 @@ els.left.addEventListener("click", e => {
   }
   if (treeTapTimer) { clearTimeout(treeTapTimer); treeTapTimer = null; treeLastTap = { id: null, time: 0 }; }
   renderContent(node);
+  const closedByTap = organizeTreeAround(node, TREE_DOM_SOFT_LIMIT, { honorBypass:false });
+  if (closedByTap > 0) {
+    renderTree();
+    setActiveTreeDom(node);
+  }
   autosaveTransientState();
 });
 const treeContextMenu = document.getElementById('treeContextMenu');
@@ -3552,7 +3699,8 @@ if (els.buttonHelpMenu) {
     if (sizeBtn) { setActivePaneFontSize(sizeBtn.dataset.fontSizeChoice); hideCycleContextMenus(); autosaveTransientState(); return; }
     const helpAction = e.target.closest('[data-help-action]');
     if (!helpAction) return;
-    if (helpAction.dataset.helpAction === 'ot-info') { hideCycleContextMenus(); showOtInfoPanel(); }
+    if (helpAction.dataset.helpAction === 'document-top') { hideCycleContextMenus(); moveToDocumentTop(); }
+    else if (helpAction.dataset.helpAction === 'ot-info') { hideCycleContextMenus(); showOtInfoPanel(); }
   });
 }
 if (els.fileMenu) {
@@ -3562,7 +3710,6 @@ if (els.fileMenu) {
     const a = btn.dataset.fileMenuAction;
     hideCycleContextMenus();
     if (a === 'open') { state.pendingReloadFileSelection = null; openFileDialog(); }
-    else if (a === 'url') openUrlDialog();
     else if (a === 'reload') reloadCurrentUserFile();
     else if (a === 'switch') switchDocumentSource();
   });
