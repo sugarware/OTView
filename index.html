@@ -1007,7 +1007,7 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 
 <div id="otInfoOverlay" class="otInfoOverlay hidden" role="dialog" aria-modal="true" aria-label="OTView情報">
   <div class="otInfoPanel">
-    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.3f</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
+    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.3g</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
     <div id="otInfoBody" class="otInfoRows"></div>
     <div class="otInfoSep"></div>
     <div id="otInfoDetail" class="otInfoSmall hidden"></div>
@@ -1228,7 +1228,7 @@ function nearestVisibleAncestor(node) {
   }
   return firstVisibleNode();
 }
-// ---- v2.3f large-document tree resource manager ----
+// ---- v2.3g large-document tree resource manager ----
 function visibleTreeChildren(node) { return (node && node.children ? node.children : []).filter(isNodeVisible); }
 function isTreeNodeExpanded(node) {
   return !!(node && node.id !== 'root' && visibleTreeChildren(node).length && !state.collapsed.has(node.id));
@@ -2885,7 +2885,7 @@ function showOtInfoPanel() {
   const bodyCount = state.flat ? state.flat.length : 0;
   const textBytes = new Blob([state.text || '']).size;
   setInfoRows([
-    ["Version", "v2.3f"],
+    ["Version", "v2.3g"],
     ['ファイル', fileName],
     ['表示形式', displayModeName(state.settings.viewMode)],
     ['見出し判定', headingDetectionStatus()],
