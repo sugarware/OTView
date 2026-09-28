@@ -314,14 +314,17 @@ main.readingFocus #right { grid-column: 1 !important; grid-row: 1 !important; }
   min-height: 0;
 }
 
-/* Short-pane rubber-band: move only pane contents, not the pane frame itself. */
-#left > *, #resultsPane > *, #right > * {
-  translate: 0 var(--short-pane-rubber-y, 0px);
-}
-#left.shortPaneRubberAnimating > *,
-#resultsPane.shortPaneRubberAnimating > *,
-#right.shortPaneRubberAnimating > * {
-  transition: translate 160ms ease-out;
+/* v2.7: Short panes get a tiny real scroll range so iOS can provide its native rubber-band. */
+.shortPaneNativeSpacer {
+  display: block;
+  width: 1px;
+  min-width: 1px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  pointer-events: none;
+  visibility: hidden;
+  flex: 0 0 auto;
 }
 
 #left.activePane, #resultsPane.activePane, #right.activePane {
@@ -3091,7 +3094,7 @@ function showOtInfoDetail() {
 }
 function showOtAbout() {
   if (!els.otInfoDetail) return;
-  els.otInfoDetail.innerHTML = '<strong>About OTView</strong><br>Version 2.6<br>Copyright © 2026 Sugarware<br>Designed by Sugarware<br>Implemented with ChatGPT';
+  els.otInfoDetail.innerHTML = '<strong>About OTView</strong><br>Version 2.7<br>Copyright © 2026 Sugarware<br>Designed by Sugarware<br>Implemented with ChatGPT';
   els.otInfoDetail.classList.remove('hidden');
 }
 function toggleCurrentNodeOneLevel() {
@@ -3201,79 +3204,60 @@ function installTreePaneDirectionLock() {
 }
 
 function installShortPaneRubberBand() {
-  // Short-pane feedback only: when a pane has no native vertical scroll range,
-  // give a vertical drag a small damped movement and spring it back on release.
-  // Native scrolling is left untouched whenever the pane can actually scroll.
+  // v2.7: Match the proven "ここコード" approach.
+  // Do not synthesize drag motion with touchmove/transform. Instead, only when
+  // content is too short to scroll, add the minimum real scroll range needed
+  // for iOS/WebKit to produce its own native rubber-band response.
   const panes = [els.left, els.resultsPane, els.right].filter(Boolean);
-  const threshold = 6;
-  const verticalBias = 1.2;
-  const damping = 0.84;
-  const maxOffset = 48;
-  const interactiveSelector = 'input, textarea, select, button, a, [contenteditable="true"], [contenteditable=""]';
-
-  function isShortPane(pane) {
-    return pane.scrollHeight <= pane.clientHeight + 1;
-  }
-
-  function hasScrollableNestedArea(target, pane) {
-    let el = target instanceof Element ? target : target.parentElement;
-    while (el && el !== pane) {
-      const style = getComputedStyle(el);
-      const overflowY = style.overflowY;
-      if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 1) return true;
-      el = el.parentElement;
-    }
-    return false;
-  }
-
-  function setOffset(pane, offset, animate) {
-    pane.classList.toggle('shortPaneRubberAnimating', !!animate);
-    pane.style.setProperty('--short-pane-rubber-y', `${offset}px`);
-  }
-
-  function reset(pane) {
-    setOffset(pane, 0, true);
-    window.setTimeout(() => pane.classList.remove('shortPaneRubberAnimating'), 180);
-  }
+  const EXTRA_SCROLL_PX = 2;
 
   panes.forEach(pane => {
-    let tracking = null;
+    let scheduled = false;
 
-    pane.addEventListener('touchstart', e => {
-      if (e.touches.length !== 1 || !isShortPane(pane)) { tracking = null; return; }
-      const target = e.target instanceof Element ? e.target : e.target.parentElement;
-      if (!target || target.closest(interactiveSelector) || hasScrollableNestedArea(target, pane)) { tracking = null; return; }
-      const t = e.touches[0];
-      tracking = { startX: t.clientX, startY: t.clientY, axis: null, active: false };
-      pane.classList.remove('shortPaneRubberAnimating');
-    }, { passive: true });
-
-    pane.addEventListener('touchmove', e => {
-      if (!tracking || e.touches.length !== 1) { tracking = null; return; }
-      if (!isShortPane(pane)) { reset(pane); tracking = null; return; }
-      const t = e.touches[0];
-      const dx = t.clientX - tracking.startX;
-      const dy = t.clientY - tracking.startY;
-
-      if (!tracking.axis) {
-        if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
-        if (Math.abs(dy) > Math.abs(dx) * verticalBias) tracking.axis = 'y';
-        else { tracking.axis = 'x'; return; }
+    function ensureSpacer() {
+      let spacer = Array.from(pane.children).find(el => el.classList && el.classList.contains('shortPaneNativeSpacer'));
+      if (!spacer) {
+        spacer = document.createElement('div');
+        spacer.className = 'shortPaneNativeSpacer';
+        spacer.setAttribute('aria-hidden', 'true');
+        pane.appendChild(spacer);
       }
-      if (tracking.axis !== 'y') return;
+      return spacer;
+    }
 
-      tracking.active = true;
-      const offset = Math.max(-maxOffset, Math.min(maxOffset, dy * damping));
-      setOffset(pane, offset, false);
-      e.preventDefault();
-    }, { passive: false });
+    function update() {
+      scheduled = false;
+      const spacer = ensureSpacer();
 
-    const finish = () => {
-      if (tracking && tracking.active) reset(pane);
-      tracking = null;
-    };
-    pane.addEventListener('touchend', finish, { passive: true });
-    pane.addEventListener('touchcancel', finish, { passive: true });
+      // Measure the pane without the synthetic scroll allowance.
+      spacer.style.height = '0px';
+      const naturalScrollHeight = pane.scrollHeight;
+      const viewportHeight = pane.clientHeight;
+
+      if (naturalScrollHeight <= viewportHeight + 1) {
+        // Fill only the unused area, plus 2 px. The visible layout does not
+        // change; the pane merely becomes minimally scrollable.
+        spacer.style.height = `${Math.max(0, viewportHeight - naturalScrollHeight + EXTRA_SCROLL_PX)}px`;
+      }
+    }
+
+    function scheduleUpdate() {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(update);
+    }
+
+    const mutationObserver = new MutationObserver(scheduleUpdate);
+    mutationObserver.observe(pane, { childList: true, subtree: true });
+
+    if (window.ResizeObserver) {
+      const resizeObserver = new ResizeObserver(scheduleUpdate);
+      resizeObserver.observe(pane);
+    } else {
+      window.addEventListener('resize', scheduleUpdate, { passive: true });
+    }
+
+    scheduleUpdate();
   });
 }
 
