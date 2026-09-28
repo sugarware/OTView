@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="OTView">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest-v2.7.webmanifest">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192-v2.7.png">
-<link rel="apple-touch-icon" href="icon-192-v2.7.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192-v2.6.png">
+<link rel="apple-touch-icon" href="icon-192-v2.6.png">
 <title>OTView v2.7</title>
 <style>
 :root {
@@ -289,6 +289,7 @@ main.readingFocus #right { grid-column: 1 !important; grid-row: 1 !important; }
   user-drag: none;
 }
 #resultsPane {
+  -webkit-overflow-scrolling: touch;
   border-top: 1px solid var(--line);
   background: var(--result-bg);
   color: var(--result-fg);
@@ -304,6 +305,7 @@ main.readingFocus #right { grid-column: 1 !important; grid-row: 1 !important; }
 #leftColumn.resultsShown #left { flex: 0 0 var(--tree-result-split); }
 #leftColumn.resultsShown #treeResultSplitter { display: block; }
 #right {
+  -webkit-overflow-scrolling: touch;
   grid-column: 3;
   overflow: auto;
   padding: 26px 34px 80px;
@@ -3204,10 +3206,9 @@ function installTreePaneDirectionLock() {
 }
 
 function installShortPaneRubberBand() {
-  // v2.7: Match the proven "ここコード" approach.
-  // Do not synthesize drag motion with touchmove/transform. Instead, only when
-  // content is too short to scroll, add the minimum real scroll range needed
-  // for iOS/WebKit to produce its own native rubber-band response.
+  // v2.7: Keep each pane as a real native scroll container even when its
+  // visible content is shorter than the viewport. The 2px allowance is put
+  // inside the pane's content flow; no touchmove/transform animation is used.
   const panes = [els.left, els.resultsPane, els.right].filter(Boolean);
   const EXTRA_SCROLL_PX = 2;
 
@@ -3215,7 +3216,7 @@ function installShortPaneRubberBand() {
     let scheduled = false;
 
     function ensureSpacer() {
-      let spacer = Array.from(pane.children).find(el => el.classList && el.classList.contains('shortPaneNativeSpacer'));
+      let spacer = pane.querySelector(':scope > .shortPaneNativeSpacer');
       if (!spacer) {
         spacer = document.createElement('div');
         spacer.className = 'shortPaneNativeSpacer';
@@ -3228,16 +3229,17 @@ function installShortPaneRubberBand() {
     function update() {
       scheduled = false;
       const spacer = ensureSpacer();
-
-      // Measure the pane without the synthetic scroll allowance.
       spacer.style.height = '0px';
-      const naturalScrollHeight = pane.scrollHeight;
+      spacer.style.flexBasis = '0px';
+
       const viewportHeight = pane.clientHeight;
+      const naturalScrollHeight = pane.scrollHeight;
+      if (viewportHeight <= 0) return;
 
       if (naturalScrollHeight <= viewportHeight + 1) {
-        // Fill only the unused area, plus 2 px. The visible layout does not
-        // change; the pane merely becomes minimally scrollable.
-        spacer.style.height = `${Math.max(0, viewportHeight - naturalScrollHeight + EXTRA_SCROLL_PX)}px`;
+        const needed = Math.max(EXTRA_SCROLL_PX, viewportHeight - naturalScrollHeight + EXTRA_SCROLL_PX);
+        spacer.style.height = `${needed}px`;
+        spacer.style.flexBasis = `${needed}px`;
       }
     }
 
@@ -3247,16 +3249,9 @@ function installShortPaneRubberBand() {
       requestAnimationFrame(update);
     }
 
-    const mutationObserver = new MutationObserver(scheduleUpdate);
-    mutationObserver.observe(pane, { childList: true, subtree: true });
-
-    if (window.ResizeObserver) {
-      const resizeObserver = new ResizeObserver(scheduleUpdate);
-      resizeObserver.observe(pane);
-    } else {
-      window.addEventListener('resize', scheduleUpdate, { passive: true });
-    }
-
+    new MutationObserver(scheduleUpdate).observe(pane, { childList: true, subtree: true });
+    if (window.ResizeObserver) new ResizeObserver(scheduleUpdate).observe(pane);
+    else window.addEventListener('resize', scheduleUpdate, { passive: true });
     scheduleUpdate();
   });
 }

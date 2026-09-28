@@ -1,14 +1,14 @@
-const CACHE_NAME = 'otview-v2.7';
+const CACHE_NAME = 'otview-v2.7-rb2';
 const APP_SHELL = [
   './',
   './index.html',
   './OTView_v2_7.html',
   './manifest-v2.7.webmanifest',
-  './icon-192-v2.7.png',
-  './icon-512-v2.7.png',
-  './apple-touch-icon-v2.7.png',
-  './favicon-32-v2.7.png',
-  './favicon-16-v2.7.png'
+  './icon-192-v2.6.png',
+  './icon-512-v2.6.png',
+  './apple-touch-icon-v2.6.png',
+  './favicon-32-v2.6.png',
+  './favicon-16-v2.6.png'
 ];
 
 self.addEventListener('install', event => {
