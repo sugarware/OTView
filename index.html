@@ -316,17 +316,19 @@ main.readingFocus #right { grid-column: 1 !important; grid-row: 1 !important; }
   min-height: 0;
 }
 
-/* v2.7: Short panes get a tiny real scroll range so iOS can provide its native rubber-band. */
-.shortPaneNativeSpacer {
-  display: block;
+/* v2.7: Same native rubber-band method as ここコード v2.10.
+   The absolute pseudo-element extends scrollHeight by 2px without changing layout. */
+#left, #resultsPane, #right {
+  position: relative;
+}
+#left::after, #resultsPane::after, #right::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
   width: 1px;
-  min-width: 1px;
-  padding: 0;
-  margin: 0;
-  border: 0;
+  height: 2px;
   pointer-events: none;
-  visibility: hidden;
-  flex: 0 0 auto;
 }
 
 #left.activePane, #resultsPane.activePane, #right.activePane {
@@ -3205,57 +3207,6 @@ function installTreePaneDirectionLock() {
   els.left.addEventListener('touchcancel', () => { tracking = null; }, { passive: true });
 }
 
-function installShortPaneRubberBand() {
-  // v2.7: Keep each pane as a real native scroll container even when its
-  // visible content is shorter than the viewport. The 2px allowance is put
-  // inside the pane's content flow; no touchmove/transform animation is used.
-  const panes = [els.left, els.resultsPane, els.right].filter(Boolean);
-  const EXTRA_SCROLL_PX = 2;
-
-  panes.forEach(pane => {
-    let scheduled = false;
-
-    function ensureSpacer() {
-      let spacer = pane.querySelector(':scope > .shortPaneNativeSpacer');
-      if (!spacer) {
-        spacer = document.createElement('div');
-        spacer.className = 'shortPaneNativeSpacer';
-        spacer.setAttribute('aria-hidden', 'true');
-        pane.appendChild(spacer);
-      }
-      return spacer;
-    }
-
-    function update() {
-      scheduled = false;
-      const spacer = ensureSpacer();
-      spacer.style.height = '0px';
-      spacer.style.flexBasis = '0px';
-
-      const viewportHeight = pane.clientHeight;
-      const naturalScrollHeight = pane.scrollHeight;
-      if (viewportHeight <= 0) return;
-
-      if (naturalScrollHeight <= viewportHeight + 1) {
-        const needed = Math.max(EXTRA_SCROLL_PX, viewportHeight - naturalScrollHeight + EXTRA_SCROLL_PX);
-        spacer.style.height = `${needed}px`;
-        spacer.style.flexBasis = `${needed}px`;
-      }
-    }
-
-    function scheduleUpdate() {
-      if (scheduled) return;
-      scheduled = true;
-      requestAnimationFrame(update);
-    }
-
-    new MutationObserver(scheduleUpdate).observe(pane, { childList: true, subtree: true });
-    if (window.ResizeObserver) new ResizeObserver(scheduleUpdate).observe(pane);
-    else window.addEventListener('resize', scheduleUpdate, { passive: true });
-    scheduleUpdate();
-  });
-}
-
 function installTouchZoomGuards() {
   // v1.6g: Pinch zoom must remain available for accessibility.
   // Do not cancel gesturestart / gesturechange / gestureend here.
@@ -4326,7 +4277,6 @@ if (els.copyLightColors) els.copyLightColors.addEventListener('click', () => app
 document.addEventListener('keydown', e => { if(e.key==='F3'){ e.preventDefault(); jumpToHit(state.currentMatchIndex + (e.shiftKey ? -1 : 1)); } else if(e.key==='f' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); setSearchMenuVisible(true, true); els.q.select(); } else if(e.key==='Escape'){ if(els.settingsPanel.classList.contains('open')) closeSettingsPanel(); else { hideCycleContextMenus(); showResults(false); } } });
 window.addEventListener('pagehide', () => saveDocumentSnapshot('pagehide'));
 window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveDocumentSnapshot('hidden'); });
-installShortPaneRubberBand();
 installTouchZoomGuards();
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
