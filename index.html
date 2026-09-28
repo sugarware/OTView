@@ -314,6 +314,16 @@ main.readingFocus #right { grid-column: 1 !important; grid-row: 1 !important; }
   min-height: 0;
 }
 
+/* Short-pane rubber-band: move only pane contents, not the pane frame itself. */
+#left > *, #resultsPane > *, #right > * {
+  translate: 0 var(--short-pane-rubber-y, 0px);
+}
+#left.shortPaneRubberAnimating > *,
+#resultsPane.shortPaneRubberAnimating > *,
+#right.shortPaneRubberAnimating > * {
+  transition: translate 160ms ease-out;
+}
+
 #left.activePane, #resultsPane.activePane, #right.activePane {
   outline: 1px solid var(--accent);
   outline-offset: -1px;
@@ -3187,6 +3197,83 @@ function installTreePaneDirectionLock() {
   els.left.addEventListener('touchcancel', () => { tracking = null; }, { passive: true });
 }
 
+function installShortPaneRubberBand() {
+  // Short-pane feedback only: when a pane has no native vertical scroll range,
+  // give a vertical drag a small damped movement and spring it back on release.
+  // Native scrolling is left untouched whenever the pane can actually scroll.
+  const panes = [els.left, els.resultsPane, els.right].filter(Boolean);
+  const threshold = 6;
+  const verticalBias = 1.2;
+  const damping = 0.28;
+  const maxOffset = 48;
+  const interactiveSelector = 'input, textarea, select, button, a, [contenteditable="true"], [contenteditable=""]';
+
+  function isShortPane(pane) {
+    return pane.scrollHeight <= pane.clientHeight + 1;
+  }
+
+  function hasScrollableNestedArea(target, pane) {
+    let el = target instanceof Element ? target : target.parentElement;
+    while (el && el !== pane) {
+      const style = getComputedStyle(el);
+      const overflowY = style.overflowY;
+      if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 1) return true;
+      el = el.parentElement;
+    }
+    return false;
+  }
+
+  function setOffset(pane, offset, animate) {
+    pane.classList.toggle('shortPaneRubberAnimating', !!animate);
+    pane.style.setProperty('--short-pane-rubber-y', `${offset}px`);
+  }
+
+  function reset(pane) {
+    setOffset(pane, 0, true);
+    window.setTimeout(() => pane.classList.remove('shortPaneRubberAnimating'), 180);
+  }
+
+  panes.forEach(pane => {
+    let tracking = null;
+
+    pane.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1 || !isShortPane(pane)) { tracking = null; return; }
+      const target = e.target instanceof Element ? e.target : e.target.parentElement;
+      if (!target || target.closest(interactiveSelector) || hasScrollableNestedArea(target, pane)) { tracking = null; return; }
+      const t = e.touches[0];
+      tracking = { startX: t.clientX, startY: t.clientY, axis: null, active: false };
+      pane.classList.remove('shortPaneRubberAnimating');
+    }, { passive: true });
+
+    pane.addEventListener('touchmove', e => {
+      if (!tracking || e.touches.length !== 1) { tracking = null; return; }
+      if (!isShortPane(pane)) { reset(pane); tracking = null; return; }
+      const t = e.touches[0];
+      const dx = t.clientX - tracking.startX;
+      const dy = t.clientY - tracking.startY;
+
+      if (!tracking.axis) {
+        if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
+        if (Math.abs(dy) > Math.abs(dx) * verticalBias) tracking.axis = 'y';
+        else { tracking.axis = 'x'; return; }
+      }
+      if (tracking.axis !== 'y') return;
+
+      tracking.active = true;
+      const offset = Math.max(-maxOffset, Math.min(maxOffset, dy * damping));
+      setOffset(pane, offset, false);
+      e.preventDefault();
+    }, { passive: false });
+
+    const finish = () => {
+      if (tracking && tracking.active) reset(pane);
+      tracking = null;
+    };
+    pane.addEventListener('touchend', finish, { passive: true });
+    pane.addEventListener('touchcancel', finish, { passive: true });
+  });
+}
+
 function installTouchZoomGuards() {
   // v1.6g: Pinch zoom must remain available for accessibility.
   // Do not cancel gesturestart / gesturechange / gestureend here.
@@ -4257,6 +4344,7 @@ if (els.copyLightColors) els.copyLightColors.addEventListener('click', () => app
 document.addEventListener('keydown', e => { if(e.key==='F3'){ e.preventDefault(); jumpToHit(state.currentMatchIndex + (e.shiftKey ? -1 : 1)); } else if(e.key==='f' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); setSearchMenuVisible(true, true); els.q.select(); } else if(e.key==='Escape'){ if(els.settingsPanel.classList.contains('open')) closeSettingsPanel(); else { hideCycleContextMenus(); showResults(false); } } });
 window.addEventListener('pagehide', () => saveDocumentSnapshot('pagehide'));
 window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveDocumentSnapshot('hidden'); });
+installShortPaneRubberBand();
 installTouchZoomGuards();
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
