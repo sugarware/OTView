@@ -1,4 +1,4 @@
-const CACHE_NAME = 'otview-v2.8';
+const CACHE_NAME = 'otview-v2.8-offlinefix1';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,19 +12,42 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
+    caches.keys()
+      .then(keys => Promise.all(
+        keys
+          .filter(key => key.startsWith('otview-') && key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+
+  // PWA起動（ナビゲーション）は、ネット接続より先にローカルの
+  // index.htmlを使う。機内モードでのコールドスタートを安定させる。
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache =>
+        cache.match('./index.html').then(cached =>
+          cached || fetch(event.request).catch(() => cache.match('./index.html'))
+        )
+      )
+    );
+    return;
+  }
+
+  // 既存動作を維持：キャッシュ優先、未キャッシュならネット取得して保存。
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
       const copy = response.clone();
