@@ -7,11 +7,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="OTView">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest-v2.9.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192-v2.6.png">
 <link rel="apple-touch-icon" href="icon-192-v2.6.png">
-<title>OTView v2.9 TEST-STATUSBAR</title>
+<title>OTView v2.9 TEST-KOKO-SHELL</title>
 <style>
 :root {
   --app-bg: #f6f7f9;
@@ -824,9 +824,49 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 .otInfoActions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; }
 .otInfoSmall { font-size: .88em; color: var(--muted); margin-top: 8px; line-height: 1.45; }
 
+
+/* TEST-KOKO-SHELL: ここコード v2.69 と同じ考え方で、
+   visual viewport と上端 safe-area を最上位シェルが所有する。
+   OTView の各機能・配色・ヘッダー部品のCSSは変更しない。 */
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+body {
+  position: fixed;
+  inset: 0;
+  min-height: 0;
+  height: var(--app-height, 100dvh);
+  display: block;
+  overflow: hidden;
+}
+.otAppShell {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: auto;
+  width: 100%;
+  height: var(--app-height, 100dvh);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top);
+}
+.otAppShell > header {
+  min-height: 54px;
+  padding-top: 8px;
+}
+@media (max-width: 640px), (orientation: portrait) {
+  .otAppShell > header { padding-top: 8px; }
+}
+
 </style>
 </head>
 <body>
+<div class="otAppShell">
 <header>
   <div class="toolbarRow topRow">
     <h1 id="appTitle" title="OTView">OTView</h1>
@@ -961,6 +1001,7 @@ main.layoutVertical #treeResultSplitter.dragging::after {
     </div>
   </section>
 </main>
+</div><!-- /.otAppShell -->
 
 
 <div id="treeContextMenu" class="treeContextMenu hidden" role="menu" aria-label="階層操作メニュー">
@@ -1046,7 +1087,7 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 
 <div id="otInfoOverlay" class="otInfoOverlay hidden" role="dialog" aria-modal="true" aria-label="OTView情報">
   <div class="otInfoPanel">
-    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.9 TEST-STATUSBAR</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
+    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.9 TEST-KOKO-SHELL</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
     <div id="otInfoBody" class="otInfoRows"></div>
     <div class="otInfoSep"></div>
     <div id="otInfoDetail" class="otInfoSmall hidden"></div>
@@ -4354,6 +4395,15 @@ window.addEventListener('pagehide', () => saveDocumentSnapshot('pagehide'));
 window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveDocumentSnapshot('hidden'); });
 installTouchZoomGuards();
 installRightPaneSwipeNavigation();
+// TEST-KOKO-SHELL: lock the app shell to the measured iOS visual viewport.
+function syncOtAppViewportHeight() {
+  const h = window.visualViewport?.height || window.innerHeight;
+  if (h > 0) document.documentElement.style.setProperty('--app-height', `${Math.round(h)}px`);
+}
+syncOtAppViewportHeight();
+window.addEventListener('resize', syncOtAppViewportHeight, { passive: true });
+window.visualViewport?.addEventListener('resize', syncOtAppViewportHeight, { passive: true });
+
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
   window.addEventListener('load', () => {
