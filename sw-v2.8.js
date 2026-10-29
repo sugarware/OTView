@@ -1,4 +1,4 @@
-const CACHE_NAME = 'otview-v2.8-offlinefix2';
+const CACHE_NAME = 'otview-v2.8-offlinefix3';
 const APP_SHELL = [
   './',
   './index.html',
