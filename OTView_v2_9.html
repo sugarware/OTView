@@ -825,18 +825,15 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 .otInfoSmall { font-size: .88em; color: var(--muted); margin-top: 8px; line-height: 1.45; }
 
 
-/* v2.9a: iOS 26/27 のホーム画面アプリは、画面上端に Liquid Glass の「スクロールエッジ効果」（ぼかし）を重ねる。
-   無効化するCSS/metaは無いが、上端に fixed/sticky で単色・全幅の箱があると WebKit は効果を省略する。
-   ヘッダを sticky にし、上端に不可視同色の固定帯を置く（インストール版のみ。Safari/PC は従来通り）。 */
-#otTopEdge { display: none; }
-@media (display-mode: standalone) {
-  header { position: sticky; top: 0; }
-  #otTopEdge { display: block; position: fixed; top: 0; left: 0; right: 0; height: 12px; background: var(--ui-bg); z-index: 1; }
+/* v2.9c: iOS 26/27 のホーム画面アプリは画面上端（約40pt）にLiquid Glassのぼかしを重ねる。
+   無効化手段は無く、固定帯やstickyでも消えない(実機確認)。文字をぼかし帯の下へ逃がす。
+   上余白 = 8px + max(safe-area上, 28px)（実機で28pxまで詰めても鮮明なことを確認）。ノッチ機は従来どおり、ホームボタン機(safe-area=20px)のみ+8px。 */
+@media (display-mode: standalone) and (max-width: 700px) and (orientation: portrait) {
+  header { padding-top: calc(8px + max(env(safe-area-inset-top), 28px)); }
 }
 </style>
 </head>
 <body>
-<div id="otTopEdge" aria-hidden="true"></div>
 <header>
   <div class="toolbarRow topRow">
     <h1 id="appTitle" title="OTView">OTView</h1>

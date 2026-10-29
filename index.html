@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest-v2.9.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192-v2.6.png">
 <link rel="apple-touch-icon" href="icon-192-v2.6.png">
-<title>OTView v2.9b HEADERTUNE</title>
+<title>OTView v2.9</title>
 <style>
 :root {
   --app-bg: #f6f7f9;
@@ -825,11 +825,11 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 .otInfoSmall { font-size: .88em; color: var(--muted); margin-top: 8px; line-height: 1.45; }
 
 
-/* v2.9b: iOS 26/27 のホーム画面アプリは画面上端（約40pt）にLiquid Glassのぼかしを重ねる。
+/* v2.9c: iOS 26/27 のホーム画面アプリは画面上端（約40pt）にLiquid Glassのぼかしを重ねる。
    無効化手段は無く、固定帯やstickyでも消えない(実機確認)。文字をぼかし帯の下へ逃がす。
-   上余白 = 8px + max(safe-area上, 48px)。ノッチ機は従来どおり、ホームボタン機(safe-area=20px)のみ増える。 */
+   上余白 = 8px + max(safe-area上, 28px)（実機で28pxまで詰めても鮮明なことを確認）。ノッチ機は従来どおり、ホームボタン機(safe-area=20px)のみ+8px。 */
 @media (display-mode: standalone) and (max-width: 700px) and (orientation: portrait) {
-  header { padding-top: calc(8px + max(env(safe-area-inset-top), 48px)); }
+  header { padding-top: calc(8px + max(env(safe-area-inset-top), 28px)); }
 }
 </style>
 </head>
@@ -4379,55 +4379,6 @@ if (isFirstStartup) {
 } else {
   setTimeout(promptRestoreSavedDocument, 0);
 }
-</script>
-
-<!-- HEADERTUNE -->
-<style id="ht-style"></style>
-<div id="ht-btn" style="position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:2147483000;background:#c00;color:#fff;font:12px/1 sans-serif;padding:8px 10px;border-radius:14px;">調整</div>
-<div id="ht-panel" style="display:none;position:fixed;left:8px;right:8px;bottom:calc(48px + env(safe-area-inset-bottom));z-index:2147483000;background:#222;color:#fff;font:13px/1.5 sans-serif;padding:10px;border-radius:12px;max-height:45vh;overflow:auto;border:1px solid #888"></div>
-<script>
-(function(){
-  let N = 48;           // max(safe-area上, N px) の N
-  let on = true;        // 調整ON/OFF（OFFで元のv2.9b相当）
-  const style = document.getElementById('ht-style');
-  const panel = document.getElementById('ht-panel');
-  function apply(){
-    style.textContent = on ? 'header{padding-top:calc(8px + max(env(safe-area-inset-top), '+N+'px)) !important}' : '';
-    const v=document.getElementById('ht-val'); if(!v) return;
-    const h=document.querySelector('header').getBoundingClientRect();
-    v.textContent = 'N = '+N+'px   ヘッダ高さ = '+Math.round(h.height)+'px   文字の上端 ≒ '+(8+N)+'px';
-  }
-  function safeTop(){
-    const p=document.createElement('div'); p.style.cssText='position:absolute;visibility:hidden;padding-top:env(safe-area-inset-top)';
-    document.body.appendChild(p); const t=getComputedStyle(p).paddingTop; p.remove(); return t;
-  }
-  function set(n){ N=Math.max(0,Math.min(80,n)); const r=document.getElementById('ht-range'); if(r) r.value=N; apply(); }
-  function btn(label, fn){
-    const b=document.createElement('button'); b.textContent=label;
-    b.style.cssText='font:14px sans-serif;padding:6px 12px;margin:3px;border-radius:8px;border:1px solid #888;background:#444;color:#fff;height:auto;min-width:0';
-    b.onclick=fn; return b;
-  }
-  function render(){
-    panel.innerHTML='';
-    const i=document.createElement('div'); i.style.cssText='font-size:11px;color:#9cf;margin-bottom:6px'; i.textContent='safeTop='+safeTop()+'  DPR='+devicePixelRatio; panel.appendChild(i);
-    const v=document.createElement('div'); v.id='ht-val'; v.style.cssText='font-size:13px;color:#fc6;margin-bottom:6px'; panel.appendChild(v);
-    const r=document.createElement('input'); r.type='range'; r.id='ht-range'; r.min=20; r.max=64; r.step=1; r.value=N; r.style.cssText='width:100%;height:28px';
-    r.oninput=()=>set(parseInt(r.value,10)); panel.appendChild(r);
-    const row=document.createElement('div'); row.style.cssText='text-align:center';
-    row.appendChild(btn('−4',()=>set(N-4))); row.appendChild(btn('−1',()=>set(N-1)));
-    row.appendChild(btn('+1',()=>set(N+1))); row.appendChild(btn('+4',()=>set(N+4)));
-    panel.appendChild(row);
-    const pre=document.createElement('div'); pre.style.cssText='text-align:center';
-    [48,44,40,36,32,28,24].forEach(n=>pre.appendChild(btn(String(n),()=>set(n)))); panel.appendChild(pre);
-    const tg=document.createElement('label'); tg.style.cssText='display:block;padding:6px 0';
-    const c=document.createElement('input'); c.type='checkbox'; c.checked=on; c.onchange=()=>{on=c.checked;apply();};
-    tg.appendChild(c); tg.appendChild(document.createTextNode(' 調整を有効（OFF=元の余白）')); panel.appendChild(tg);
-    const n=document.createElement('div'); n.style.cssText='font-size:11px;color:#aaa'; n.textContent='数値を小さくしていき、ヘッダ文字がボケ始める直前のNを教えてください（ボケ始めたら1〜2戻すと安全）。パネルを閉じて文字を確認してください。'; panel.appendChild(n);
-    apply();
-  }
-  document.getElementById('ht-btn').addEventListener('click',()=>{ if(panel.style.display==='none'){render();panel.style.display='block';}else{panel.style.display='none';} });
-  apply();
-})();
 </script>
 </body>
 </html>
