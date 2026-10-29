@@ -1,4 +1,4 @@
-const CACHE_NAME = 'otview-v2.9-test-koko-shell';
+const CACHE_NAME = 'otview-v2.9-final30';
 const APP_SHELL = [
   './',
   './index.html',
