@@ -275,7 +275,7 @@ main.readingFocus #right { grid-column: 1 !important; grid-row: 1 !important; }
   overflow-x: hidden;
   min-height: 0;
   flex: 1 1 100%;
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: auto;
   overscroll-behavior: contain;
 }
 /* v1.7c: hierarchy pane is an operation area, not a text-selection area.
@@ -290,7 +290,7 @@ main.readingFocus #right { grid-column: 1 !important; grid-row: 1 !important; }
   user-drag: none;
 }
 #resultsPane {
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: auto;
   border-top: 1px solid var(--line);
   background: var(--result-bg);
   color: var(--result-fg);
@@ -306,7 +306,7 @@ main.readingFocus #right { grid-column: 1 !important; grid-row: 1 !important; }
 #leftColumn.resultsShown #left { flex: 0 0 var(--tree-result-split); }
 #leftColumn.resultsShown #treeResultSplitter { display: block; }
 #right {
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: auto;
   grid-column: 3;
   overflow: auto;
   padding: 26px 34px 80px;
@@ -1055,7 +1055,7 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 
 <div id="otInfoOverlay" class="otInfoOverlay hidden" role="dialog" aria-modal="true" aria-label="OTView情報">
   <div class="otInfoPanel">
-    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.9 TEST-SAFEAREA</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
+    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.9 TEST-SCROLL</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
     <div id="otInfoBody" class="otInfoRows"></div>
     <div class="otInfoSep"></div>
     <div id="otInfoDetail" class="otInfoSmall hidden"></div>
