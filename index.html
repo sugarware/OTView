@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest-v2.9.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192-v2.6.png">
 <link rel="apple-touch-icon" href="icon-192-v2.6.png">
-<title>OTView v2.9 BLURTEST</title>
+<title>OTView v2.9</title>
 <style>
 :root {
   --app-bg: #f6f7f9;
@@ -824,9 +824,19 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 .otInfoActions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; }
 .otInfoSmall { font-size: .88em; color: var(--muted); margin-top: 8px; line-height: 1.45; }
 
+
+/* v2.9a: iOS 26/27 のホーム画面アプリは、画面上端に Liquid Glass の「スクロールエッジ効果」（ぼかし）を重ねる。
+   無効化するCSS/metaは無いが、上端に fixed/sticky で単色・全幅の箱があると WebKit は効果を省略する。
+   ヘッダを sticky にし、上端に不可視同色の固定帯を置く（インストール版のみ。Safari/PC は従来通り）。 */
+#otTopEdge { display: none; }
+@media (display-mode: standalone) {
+  header { position: sticky; top: 0; }
+  #otTopEdge { display: block; position: fixed; top: 0; left: 0; right: 0; height: 12px; background: var(--ui-bg); z-index: 1; }
+}
 </style>
 </head>
 <body>
+<div id="otTopEdge" aria-hidden="true"></div>
 <header>
   <div class="toolbarRow topRow">
     <h1 id="appTitle" title="OTView">OTView</h1>
@@ -4372,54 +4382,6 @@ if (isFirstStartup) {
 } else {
   setTimeout(promptRestoreSavedDocument, 0);
 }
-</script>
-
-<!-- BLURTEST: 診断パネル（原因切り分け用。本番には入れない） -->
-<style id="bt-style"></style>
-<div id="bt-btn" style="position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:2147483000;background:#c00;color:#fff;font:12px/1 sans-serif;padding:8px 10px;border-radius:14px;">診断</div>
-<div id="bt-panel" style="display:none;position:fixed;left:8px;right:8px;bottom:calc(48px + env(safe-area-inset-bottom));z-index:2147483000;background:#222;color:#fff;font:13px/1.5 sans-serif;padding:10px;border-radius:12px;max-height:60vh;overflow:auto;border:1px solid #888"></div>
-<script>
-(function(){
-  const rules = {
-    A: ['A: ボタンの:hover filterを無効', 'button:hover,.fileOpenButton:hover{filter:none !important}'],
-    B: ['B: ヘッダを独立レイヤー化(translateZ)', 'header{transform:translateZ(0)}'],
-    C: ['C: ヘッダをz-index最前面', 'header{position:relative;z-index:900}'],
-    D: ['D: 上のsafe-area余白を外す(位置依存の確認)', 'header{padding-top:8px !important}'],
-    E: ['E: スクロール用の::after(2px拡張)を無効', '#left::after,#resultsPane::after,#right::after{display:none !important}'],
-    F: ['F: ヘッダ文字をgrayscale描画', 'header{-webkit-font-smoothing:antialiased}'],
-    G: ['G: ペインのoutline(赤枠)を無効', '.activePane{outline:none !important}'],
-    H: ['H: ヘッダ配下のtransition/filterを全無効', 'header *{transition:none !important;filter:none !important}']
-  };
-  const state = {};
-  const style = document.getElementById('bt-style');
-  const panel = document.getElementById('bt-panel');
-  function apply(){
-    style.textContent = Object.keys(state).filter(k=>state[k]).map(k=>rules[k][1]).join('\n');
-  }
-  function info(){
-    const p=document.createElement('div'); p.style.cssText='position:absolute;visibility:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
-    document.body.appendChild(p); const cs=getComputedStyle(p);
-    const t=cs.paddingTop,b=cs.paddingBottom; p.remove();
-    const h=document.querySelector('header').getBoundingClientRect();
-    return 'standalone='+(navigator.standalone===true)+' DPR='+devicePixelRatio+' inner='+innerWidth+'x'+innerHeight+' safeTop='+t+' safeBottom='+b+' header='+Math.round(h.top)+'-'+Math.round(h.bottom);
-  }
-  function render(){
-    panel.innerHTML='';
-    const i=document.createElement('div'); i.style.cssText='font-size:11px;color:#9cf;margin-bottom:6px'; i.textContent=info(); panel.appendChild(i);
-    Object.keys(rules).forEach(k=>{
-      const l=document.createElement('label'); l.style.cssText='display:block;padding:4px 0';
-      const c=document.createElement('input'); c.type='checkbox'; c.checked=!!state[k];
-      c.onchange=()=>{state[k]=c.checked;apply();};
-      l.appendChild(c); l.appendChild(document.createTextNode(' '+rules[k][0])); panel.appendChild(l);
-    });
-    const vf=document.createElement('label'); vf.style.cssText='display:block;padding:4px 0';
-    const vc=document.createElement('input'); vc.type='checkbox';
-    vc.onchange=()=>{document.querySelector('meta[name=viewport]').setAttribute('content', vc.checked?'width=device-width, initial-scale=1.0':'width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content');};
-    vf.appendChild(vc); vf.appendChild(document.createTextNode(' I: viewport-fit=coverを外す')); panel.appendChild(vf);
-    const n=document.createElement('div'); n.style.cssText='font-size:11px;color:#aaa;margin-top:6px'; n.textContent='1つずつON→ヘッダの文字がシャープになるか確認。効いた項目を教えてください。'; panel.appendChild(n);
-  }
-  document.getElementById('bt-btn').addEventListener('click',()=>{ if(panel.style.display==='none'){render();panel.style.display='block';}else panel.style.display='none'; });
-})();
 </script>
 </body>
 </html>

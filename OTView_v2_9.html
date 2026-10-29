@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#121416">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -73,12 +73,8 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
-html, body { width: 100%; height: 100%; }
+html, body { height: 100%; }
 body {
-  position: fixed;
-  inset: 0;
-  min-height: 0;
-  height: var(--app-height, 100dvh);
   margin: 0;
   font-family: var(--ui-font);
   font-size: var(--ui-font-size);
@@ -828,9 +824,19 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 .otInfoActions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; }
 .otInfoSmall { font-size: .88em; color: var(--muted); margin-top: 8px; line-height: 1.45; }
 
+
+/* v2.9a: iOS 26/27 のホーム画面アプリは、画面上端に Liquid Glass の「スクロールエッジ効果」（ぼかし）を重ねる。
+   無効化するCSS/metaは無いが、上端に fixed/sticky で単色・全幅の箱があると WebKit は効果を省略する。
+   ヘッダを sticky にし、上端に不可視同色の固定帯を置く（インストール版のみ。Safari/PC は従来通り）。 */
+#otTopEdge { display: none; }
+@media (display-mode: standalone) {
+  header { position: sticky; top: 0; }
+  #otTopEdge { display: block; position: fixed; top: 0; left: 0; right: 0; height: 12px; background: var(--ui-bg); z-index: 1; }
+}
 </style>
 </head>
 <body>
+<div id="otTopEdge" aria-hidden="true"></div>
 <header>
   <div class="toolbarRow topRow">
     <h1 id="appTitle" title="OTView">OTView</h1>
@@ -1050,7 +1056,7 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 
 <div id="otInfoOverlay" class="otInfoOverlay hidden" role="dialog" aria-modal="true" aria-label="OTView情報">
   <div class="otInfoPanel">
-    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.9 TEST-VIEWPORT</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
+    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.9</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
     <div id="otInfoBody" class="otInfoRows"></div>
     <div class="otInfoSep"></div>
     <div id="otInfoDetail" class="otInfoSmall hidden"></div>
@@ -4376,21 +4382,6 @@ if (isFirstStartup) {
 } else {
   setTimeout(promptRestoreSavedDocument, 0);
 }
-
-// TEST-VIEWPORT: iOS/PWA visual viewport height synchronization.
-function syncAppViewportHeight() {
-  const h = window.visualViewport?.height || window.innerHeight;
-  if (h > 0) document.documentElement.style.setProperty("--app-height", `${Math.round(h)}px`);
-}
-syncAppViewportHeight();
-window.addEventListener("resize", syncAppViewportHeight, { passive: true });
-window.addEventListener("orientationchange", () => {
-  syncAppViewportHeight();
-  requestAnimationFrame(syncAppViewportHeight);
-  setTimeout(syncAppViewportHeight, 120);
-  setTimeout(syncAppViewportHeight, 350);
-}, { passive: true });
-window.visualViewport?.addEventListener("resize", syncAppViewportHeight, { passive: true });
 </script>
 </body>
 </html>
