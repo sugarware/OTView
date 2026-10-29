@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#121416">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -73,8 +73,12 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
-html, body { height: 100%; }
+html, body { width: 100%; height: 100%; }
 body {
+  position: fixed;
+  inset: 0;
+  min-height: 0;
+  height: var(--app-height, 100dvh);
   margin: 0;
   font-family: var(--ui-font);
   font-size: var(--ui-font-size);
@@ -83,15 +87,14 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding-top: env(safe-area-inset-top);
 }
 header {
-  min-height: 54px;
+  min-height: calc(54px + env(safe-area-inset-top));
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 6px;
-  padding: 8px calc(12px + env(safe-area-inset-right)) 8px calc(12px + env(safe-area-inset-left));
+  padding: calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 8px calc(12px + env(safe-area-inset-left));
   border-bottom: 1px solid var(--line);
   background: var(--ui-bg);
   color: var(--ui-fg);
@@ -168,7 +171,7 @@ header .compactOnly { white-space: nowrap; }
 }
 #q { margin-left: 0; width: 100%; min-width: 0; flex: 1 1 auto; -webkit-appearance: none; appearance: none; }
 @media (max-width: 640px), (orientation: portrait) {
-  header { gap: 6px; padding: 8px calc(10px + env(safe-area-inset-right)) 8px calc(10px + env(safe-area-inset-left)); }
+  header { gap: 6px; padding: calc(8px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) 8px calc(10px + env(safe-area-inset-left)); }
   .toolbarRow { flex-wrap: nowrap; gap: 6px; }
   header h1 { font-size: 1em; margin-right: 4px; }
   .fileOpenButton, header button { min-width: 3.0em; height: 2.15em; padding: 0 10px; }
@@ -275,7 +278,7 @@ main.readingFocus #right { grid-column: 1 !important; grid-row: 1 !important; }
   overflow-x: hidden;
   min-height: 0;
   flex: 1 1 100%;
-  -webkit-overflow-scrolling: auto;
+  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
 /* v1.7c: hierarchy pane is an operation area, not a text-selection area.
@@ -290,7 +293,7 @@ main.readingFocus #right { grid-column: 1 !important; grid-row: 1 !important; }
   user-drag: none;
 }
 #resultsPane {
-  -webkit-overflow-scrolling: auto;
+  -webkit-overflow-scrolling: touch;
   border-top: 1px solid var(--line);
   background: var(--result-bg);
   color: var(--result-fg);
@@ -306,7 +309,7 @@ main.readingFocus #right { grid-column: 1 !important; grid-row: 1 !important; }
 #leftColumn.resultsShown #left { flex: 0 0 var(--tree-result-split); }
 #leftColumn.resultsShown #treeResultSplitter { display: block; }
 #right {
-  -webkit-overflow-scrolling: auto;
+  -webkit-overflow-scrolling: touch;
   grid-column: 3;
   overflow: auto;
   padding: 26px 34px 80px;
@@ -825,14 +828,6 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 .otInfoActions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; }
 .otInfoSmall { font-size: .88em; color: var(--muted); margin-top: 8px; line-height: 1.45; }
 
-
-/* v2.9 test: avoid iOS/touch hover filter rasterization blur */
-@media (hover: none), (pointer: coarse) {
-  button:hover,
-  .fileOpenButton:hover {
-    filter: none;
-  }
-}
 </style>
 </head>
 <body>
@@ -1055,7 +1050,7 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 
 <div id="otInfoOverlay" class="otInfoOverlay hidden" role="dialog" aria-modal="true" aria-label="OTView情報">
   <div class="otInfoPanel">
-    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.9 TEST-SCROLL</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
+    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.9 TEST-VIEWPORT</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
     <div id="otInfoBody" class="otInfoRows"></div>
     <div class="otInfoSep"></div>
     <div id="otInfoDetail" class="otInfoSmall hidden"></div>
@@ -4381,6 +4376,21 @@ if (isFirstStartup) {
 } else {
   setTimeout(promptRestoreSavedDocument, 0);
 }
+
+// TEST-VIEWPORT: iOS/PWA visual viewport height synchronization.
+function syncAppViewportHeight() {
+  const h = window.visualViewport?.height || window.innerHeight;
+  if (h > 0) document.documentElement.style.setProperty("--app-height", `${Math.round(h)}px`);
+}
+syncAppViewportHeight();
+window.addEventListener("resize", syncAppViewportHeight, { passive: true });
+window.addEventListener("orientationchange", () => {
+  syncAppViewportHeight();
+  requestAnimationFrame(syncAppViewportHeight);
+  setTimeout(syncAppViewportHeight, 120);
+  setTimeout(syncAppViewportHeight, 350);
+}, { passive: true });
+window.visualViewport?.addEventListener("resize", syncAppViewportHeight, { passive: true });
 </script>
 </body>
 </html>
