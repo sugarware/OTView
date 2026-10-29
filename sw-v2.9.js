@@ -1,4 +1,4 @@
-const CACHE_NAME = 'otview-v2.9-hover-test';
+const CACHE_NAME = 'otview-v2.9-safearea-test';
 const APP_SHELL = [
   './',
   './index.html',
