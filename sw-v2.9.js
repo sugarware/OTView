@@ -1,4 +1,4 @@
-const CACHE_NAME = 'otview-v2.9c';
+const CACHE_NAME = 'otview-v2.9-test-statusbar';
 const APP_SHELL = [
   './',
   './index.html',

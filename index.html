@@ -7,11 +7,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="OTView">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest-v2.9.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192-v2.6.png">
 <link rel="apple-touch-icon" href="icon-192-v2.6.png">
-<title>OTView v2.9</title>
+<title>OTView v2.9 TEST-STATUSBAR</title>
 <style>
 :root {
   --app-bg: #f6f7f9;
@@ -824,13 +824,6 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 .otInfoActions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; }
 .otInfoSmall { font-size: .88em; color: var(--muted); margin-top: 8px; line-height: 1.45; }
 
-
-/* v2.9c: iOS 26/27 のホーム画面アプリは画面上端（約40pt）にLiquid Glassのぼかしを重ねる。
-   無効化手段は無く、固定帯やstickyでも消えない(実機確認)。文字をぼかし帯の下へ逃がす。
-   上余白 = 8px + max(safe-area上, 28px)（実機で28pxまで詰めても鮮明なことを確認）。ノッチ機は従来どおり、ホームボタン機(safe-area=20px)のみ+8px。 */
-@media (display-mode: standalone) and (max-width: 700px) and (orientation: portrait) {
-  header { padding-top: calc(8px + max(env(safe-area-inset-top), 28px)); }
-}
 </style>
 </head>
 <body>
@@ -1053,7 +1046,7 @@ main.layoutVertical #treeResultSplitter.dragging::after {
 
 <div id="otInfoOverlay" class="otInfoOverlay hidden" role="dialog" aria-modal="true" aria-label="OTView情報">
   <div class="otInfoPanel">
-    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.9</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
+    <div class="otInfoHeader"><strong>OTView</strong><span id="otInfoVersion">v2.9 TEST-STATUSBAR</span><span style="flex:1"></span><button id="otInfoClose">閉じる</button></div>
     <div id="otInfoBody" class="otInfoRows"></div>
     <div class="otInfoSep"></div>
     <div id="otInfoDetail" class="otInfoSmall hidden"></div>
